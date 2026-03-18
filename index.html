@@ -1,14 +1,2236 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/learn_python/assets/favicon.ico" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Learn Python with Ajay Choudhary</title>
-  <script type="module" crossorigin src="/learn_python/assets/index-Dbew0_gO.js"></script>
-  <link rel="stylesheet" crossorigin href="/learn_python/assets/index-CUGbzYRX.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Python Zero to Hero — 2026 Interactive Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+/* ── Dynamic multi-CDN Skulpt loader with status feedback ── */
+(function() {
+  var CORE_CDNS = [
+    'https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js',
+    'https://unpkg.com/skulpt@1.2.0/dist/skulpt.min.js',
+    'https://skulpt.org/js/skulpt.min.js'
+  ];
+  var STDLIB_CDNS = [
+    'https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js',
+    'https://unpkg.com/skulpt@1.2.0/dist/skulpt-stdlib.js',
+    'https://skulpt.org/js/skulpt-stdlib.js'
+  ];
+
+  function setStatus(msg, isError) {
+    var btns = document.querySelectorAll('.btn-run');
+    btns.forEach(function(b) {
+      b.textContent = isError ? '⚠ Unavailable' : msg;
+      b.disabled = !isError ? true : false;
+      b.style.background = isError ? '#dc2626' : '';
+    });
+    if (isError) {
+      /* Show fallback banner */
+      var banner = document.getElementById('py-fallback-banner');
+      if (banner) banner.style.display = 'flex';
+    }
+  }
+
+  function loadScript(urls, idx, onSuccess, onFail) {
+    if (idx >= urls.length) { onFail(); return; }
+    var s = document.createElement('script');
+    s.src = urls[idx];
+    s.onload  = function() { onSuccess(); };
+    s.onerror = function() { loadScript(urls, idx + 1, onSuccess, onFail); };
+    document.head.appendChild(s);
+  }
+
+  window._skulptReady = false;
+
+  document.addEventListener('DOMContentLoaded', function() {
+    setStatus('⟳ Loading Python…', false);
+
+    loadScript(CORE_CDNS, 0, function() {
+      /* core loaded — now load stdlib */
+      loadScript(STDLIB_CDNS, 0, function() {
+        /* both loaded */
+        window._skulptReady = true;
+        var btns = document.querySelectorAll('.btn-run');
+        btns.forEach(function(b) {
+          b.textContent = '▶ Run';
+          b.disabled = false;
+          b.style.background = '';
+        });
+        console.log('Skulpt loaded OK');
+      }, function() {
+        /* stdlib failed — core-only mode still useful */
+        window._skulptReady = true;
+        var btns = document.querySelectorAll('.btn-run');
+        btns.forEach(function(b) { b.textContent = '▶ Run'; b.disabled = false; b.style.background = ''; });
+        console.warn('Skulpt stdlib failed, core-only mode');
+      });
+    }, function() {
+      /* all core CDNs failed */
+      setStatus('', true);
+      console.error('All Skulpt CDNs failed');
+    });
+  });
+})();
+</script>
+<style>
+/* ─── TOKENS ─── */
+:root{
+  --bg:#f0fdf4;
+  --white:#ffffff;
+  --ink:#0f172a;
+  --ink2:#1e293b;
+  --ink3:#475569;
+  --ink4:#94a3b8;
+  --border:#e2e8f0;
+  --border2:#cbd5e1;
+  --teal:#0f766e;
+  --teal-d:#0d6b63;
+  --teal-l:#99f6e4;
+  --teal-bg:#f0fdfa;
+  --amber:#d97706;
+  --amber-bg:#fffbeb;
+  --amber-l:#fef3c7;
+  --green:#059669;
+  --green-bg:#ecfdf5;
+  --red:#dc2626;
+  --red-bg:#fef2f2;
+  --blue:#2563eb;
+  --blue-bg:#eff6ff;
+  --purple:#7c3aed;
+  --purple-bg:#f5f3ff;
+  --code-bg:#0f172a;
+  --code-border:#1e293b;
+  --output-bg:#052e16;
+  --radius:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+  --shadow-lg:0 4px 6px rgba(0,0,0,.05),0 10px 30px rgba(0,0,0,.12);
+}
+
+/* ─── RESET ─── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--ink);line-height:1.7;overflow-x:hidden}
+img{max-width:100%}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--teal-l);border-radius:3px}
+
+/* ─── PROGRESS BAR ─── */
+#top-progress{
+  position:fixed;top:0;left:0;right:0;height:3px;
+  background:var(--border);z-index:1000;
+}
+#top-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--amber));width:0%;transition:width .15s}
+
+/* ─── NAVBAR ─── */
+.navbar{
+  position:sticky;top:0;z-index:500;
+  background:var(--white);border-bottom:1px solid var(--border);
+  padding:0 1.5rem;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:var(--shadow);
+}
+.nav-brand{
+  display:flex;align-items:center;gap:10px;text-decoration:none;
+}
+.nav-logo-icon{
+  width:36px;height:36px;background:var(--teal);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  color:white;font-family:'Fira Code',monospace;font-size:.75rem;font-weight:600;
+  flex-shrink:0;
+}
+.nav-logo-text{
+  font-weight:800;font-size:1rem;color:var(--ink);
+  display:flex;flex-direction:column;line-height:1.1;
+}
+.nav-logo-text small{font-size:.65rem;font-weight:500;color:var(--teal);letter-spacing:.5px}
+.nav-right{display:flex;align-items:center;gap:.75rem}
+.nav-progress-ring{
+  display:flex;align-items:center;gap:6px;
+  font-size:.78rem;font-weight:600;color:var(--teal);
+}
+.progress-ring{width:32px;height:32px;transform:rotate(-90deg)}
+.progress-ring-bg{fill:none;stroke:var(--border);stroke-width:3}
+.progress-ring-fill{fill:none;stroke:var(--teal);stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .4s}
+.hamburger{
+  display:none;flex-direction:column;gap:5px;
+  background:none;border:none;cursor:pointer;padding:8px;
+  border-radius:8px;
+}
+.hamburger span{display:block;width:22px;height:2px;background:var(--ink);border-radius:2px;transition:all .3s}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
+/* ─── MOBILE DRAWER ─── */
+.drawer-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:400;
+}
+.drawer-overlay.open{display:block}
+.drawer{
+  position:fixed;top:0;left:-280px;width:280px;height:100vh;
+  background:var(--white);z-index:450;transition:left .3s ease;
+  overflow-y:auto;padding:1.5rem 1.25rem;
+  display:flex;flex-direction:column;gap:4px;
+  box-shadow:4px 0 20px rgba(0,0,0,.15);
+}
+.drawer.open{left:0}
+.drawer-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-bottom:1rem;margin-bottom:.5rem;border-bottom:1px solid var(--border);
+}
+.drawer-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--ink3);padding:4px}
+.drawer-link{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:8px;text-decoration:none;color:var(--ink2);
+  font-size:.88rem;font-weight:500;transition:all .15s;
+}
+.drawer-link:hover,.drawer-link.active{background:var(--teal-bg);color:var(--teal)}
+.drawer-link .dl-icon{font-size:1rem;width:24px;text-align:center}
+.drawer-link .dl-check{
+  margin-left:auto;width:18px;height:18px;border-radius:50%;
+  background:var(--green);color:white;font-size:.65rem;
+  display:none;align-items:center;justify-content:center;
+}
+.drawer-link.done .dl-check{display:flex}
+
+/* ─── LAYOUT ─── */
+.page-wrap{display:flex;min-height:calc(100vh - 60px)}
+.sidebar{
+  width:240px;flex-shrink:0;
+  position:sticky;top:60px;height:calc(100vh - 60px);
+  overflow-y:auto;padding:1.25rem 1rem;
+  border-right:1px solid var(--border);background:var(--white);
+  display:flex;flex-direction:column;gap:2px;
+}
+.sidebar-link{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;
+  border-radius:8px;text-decoration:none;color:var(--ink3);
+  font-size:.83rem;font-weight:500;transition:all .15s;
+}
+.sidebar-link:hover{background:var(--teal-bg);color:var(--teal)}
+.sidebar-link.active{background:var(--teal-bg);color:var(--teal);font-weight:700}
+.sidebar-link .sl-num{
+  width:22px;height:22px;border-radius:50%;border:2px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fira Code',monospace;font-size:.65rem;font-weight:600;
+  flex-shrink:0;transition:all .15s;
+}
+.sidebar-link.done .sl-num{background:var(--green);border-color:var(--green);color:white}
+.sidebar-link.active .sl-num{background:var(--teal);border-color:var(--teal);color:white}
+.sidebar-section{
+  font-size:.65rem;font-weight:700;color:var(--ink4);letter-spacing:2px;
+  text-transform:uppercase;padding:10px 12px 4px;margin-top:6px;
+}
+.main-content{flex:1;min-width:0;padding:0}
+
+/* ─── HERO ─── */
+.hero{
+  background:linear-gradient(135deg,var(--teal) 0%,#065f46 100%);
+  padding:3.5rem 1.5rem 2.5rem;
+  position:relative;overflow:hidden;
+}
+.hero::after{
+  content:'';position:absolute;bottom:-2px;left:0;right:0;height:40px;
+  background:var(--bg);clip-path:ellipse(55% 100% at 50% 100%);
+}
+.hero-inner{max-width:860px;margin:0 auto}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+  border-radius:20px;padding:5px 14px;margin-bottom:1.25rem;
+  font-size:.75rem;font-weight:600;color:rgba(255,255,255,.9);
+  backdrop-filter:blur(4px);
+}
+.hero h1{
+  font-size:clamp(1.9rem,5vw,3rem);font-weight:800;
+  color:white;line-height:1.15;letter-spacing:-.03em;margin-bottom:.75rem;
+}
+.hero h1 em{font-style:normal;color:var(--amber-l)}
+.hero-sub{
+  color:rgba(255,255,255,.8);font-size:1rem;max-width:540px;
+  margin-bottom:1.75rem;line-height:1.65;
+}
+.hero-chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:2rem}
+.chip{
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.85);padding:4px 12px;border-radius:20px;
+  font-size:.75rem;font-weight:500;
+}
+.hero-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:rgba(255,255,255,.1);border-radius:12px;overflow:hidden;
+  max-width:420px;
+}
+.hs{background:rgba(255,255,255,.08);padding:.85rem;text-align:center}
+.hs-num{font-size:1.6rem;font-weight:800;color:white;font-family:'Fira Code',monospace}
+.hs-label{font-size:.7rem;color:rgba(255,255,255,.65);margin-top:2px}
+
+/* ─── SECTIONS ─── */
+.section{padding:2.5rem 1.5rem;max-width:860px;margin:0 auto}
+.section+.section{padding-top:0}
+
+/* Lesson header */
+.lesson-hd{
+  display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.5rem;
+  padding-top:2rem;border-top:2px solid var(--border);
+}
+.lesson-hd:first-child{border-top:none;padding-top:0}
+.lesson-icon{
+  width:48px;height:48px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;flex-shrink:0;
+}
+.lesson-title h2{
+  font-size:clamp(1.3rem,3vw,1.75rem);font-weight:800;
+  letter-spacing:-.03em;color:var(--ink);
+}
+.lesson-title .sub{color:var(--ink3);font-size:.85rem;margin-top:2px}
+.lesson-badge-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--teal);color:white;padding:3px 10px;
+  border-radius:4px;font-size:.65rem;font-weight:700;letter-spacing:.5px;
+  font-family:'Fira Code',monospace;text-transform:uppercase;
+}
+
+/* Prose */
+.prose{font-size:.93rem;color:var(--ink2);line-height:1.75;margin-bottom:1rem}
+.prose strong{color:var(--ink);font-weight:700}
+.prose code{
+  background:var(--teal-bg);color:var(--teal);
+  padding:1px 6px;border-radius:4px;
+  font-family:'Fira Code',monospace;font-size:.84em;
+  border:1px solid var(--teal-l);
+}
+
+/* ─── CALLOUTS ─── */
+.callout{
+  border-radius:var(--radius);padding:1rem 1.25rem;
+  margin:1rem 0;display:flex;gap:.875rem;align-items:flex-start;
+}
+.callout.tip{background:var(--amber-bg);border:1.5px solid #fcd34d}
+.callout.note{background:var(--blue-bg);border:1.5px solid #93c5fd}
+.callout.warn{background:var(--red-bg);border:1.5px solid #fca5a5}
+.callout.fun{background:var(--purple-bg);border:1.5px solid #c4b5fd}
+.callout.ok{background:var(--green-bg);border:1.5px solid #6ee7b7}
+.callout-icon{font-size:1.2rem;flex-shrink:0;margin-top:2px}
+.callout p{font-size:.875rem;color:var(--ink2);line-height:1.65}
+.callout strong{color:var(--ink)}
+.callout-head{
+  font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:3px;color:var(--ink3);
+}
+
+/* ─── DATA TYPE CARDS ─── */
+.dtype-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:.75rem;margin:1rem 0;
+}
+.dtype-card{
+  border-radius:10px;padding:.9rem;text-align:center;border:2px solid;
+  transition:transform .15s;
+}
+.dtype-card:hover{transform:translateY(-2px)}
+.dtype-card .dn{font-family:'Fira Code',monospace;font-weight:600;font-size:.85rem;margin-bottom:4px}
+.dtype-card h4{font-size:.8rem;font-weight:700;margin-bottom:2px}
+.dtype-card p{font-size:.72rem;color:var(--ink3);line-height:1.4;margin:0}
+.dtype-card .dex{font-family:'Fira Code',monospace;font-size:.7rem;margin-top:5px}
+.dt-int{background:#dbeafe;border-color:#93c5fd}.dt-int .dn{color:#1d4ed8}
+.dt-float{background:#fef9c3;border-color:#fde047}.dt-float .dn{color:#854d0e}
+.dt-str{background:#dcfce7;border-color:#86efac}.dt-str .dn{color:#065f46}
+.dt-bool{background:#fce7f3;border-color:#f9a8d4}.dt-bool .dn{color:#9d174d}
+.dt-none{background:#f1f5f9;border-color:#cbd5e1}.dt-none .dn{color:#475569}
+
+/* ─── CONCEPT CARDS ─── */
+.cc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem;margin:1rem 0}
+.cc{background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:1rem}
+.cc h4{font-size:.85rem;font-weight:700;color:var(--teal);margin-bottom:4px}
+.cc p{font-size:.8rem;color:var(--ink3);margin:0;line-height:1.55}
+
+/* ─── TABLES ─── */
+.table-wrap{overflow-x:auto;margin:1rem 0;border-radius:var(--radius);box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;background:var(--white);white-space:nowrap}
+th{
+  background:var(--ink);color:white;padding:10px 14px;text-align:left;
+  font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+}
+td{padding:9px 14px;font-size:.85rem;border-bottom:1px solid var(--border);color:var(--ink2)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--teal-bg)}
+.sym{
+  font-family:'Fira Code',monospace;font-weight:600;
+  background:var(--teal-bg);color:var(--teal);
+  padding:2px 8px;border-radius:4px;font-size:.85rem;
+}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:.7rem;font-weight:700;font-family:'Fira Code',monospace}
+.bg{background:#dcfce7;color:#14532d}.br{background:#fee2e2;color:#7f1d1d}
+
+/* ─── CODE EDITOR (SKULPT) ─── */
+.editor-wrap{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+  margin:1.25rem 0;box-shadow:var(--shadow);
+}
+.editor-top{
+  background:var(--code-bg);padding:10px 14px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
+}
+.editor-dots{display:flex;gap:5px}
+.ed{width:11px;height:11px;border-radius:50%}
+.ed-r{background:#ff5f57}.ed-y{background:#febc2e}.ed-g{background:#28c840}
+.editor-label{
+  font-family:'Fira Code',monospace;font-size:.68rem;color:#64748b;
+  display:flex;align-items:center;gap:8px;
+}
+.editor-actions{display:flex;gap:6px;align-items:center}
+.btn-run{
+  background:var(--green);color:white;border:none;cursor:pointer;
+  padding:7px 16px;border-radius:6px;font-size:.8rem;font-weight:700;
+  display:flex;align-items:center;gap:6px;transition:all .15s;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  touch-action:manipulation;min-height:36px;
+}
+.btn-run:hover{background:#047857;transform:scale(1.03)}
+.btn-run:active{transform:scale(.97)}
+.btn-run.running{background:var(--amber);cursor:default}
+.btn-reset{
+  background:rgba(255,255,255,.08);color:#94a3b8;border:1px solid rgba(255,255,255,.12);
+  cursor:pointer;padding:7px 12px;border-radius:6px;font-size:.78rem;
+  transition:all .15s;font-family:'Plus Jakarta Sans',sans-serif;
+  touch-action:manipulation;min-height:36px;
+}
+.btn-reset:hover{background:rgba(255,255,255,.15);color:white}
+.btn-copy{
+  background:rgba(255,255,255,.08);color:#94a3b8;border:1px solid rgba(255,255,255,.12);
+  cursor:pointer;padding:7px 12px;border-radius:6px;font-size:.78rem;
+  transition:all .15s;font-family:'Plus Jakarta Sans',sans-serif;
+  touch-action:manipulation;min-height:36px;
+}
+.btn-copy:hover{background:rgba(255,255,255,.15);color:white}
+.btn-copy.copied{color:#4ade80}
+.code-textarea{
+  width:100%;background:var(--code-bg);border:none;outline:none;
+  color:#e2e8f0;font-family:'Fira Code',monospace;font-size:.8rem;
+  line-height:1.85;padding:1.25rem;resize:vertical;min-height:180px;
+  tab-size:4;
+}
+.code-textarea:focus{background:#111827}
+.output-area{
+  background:var(--output-bg);border-top:1px solid var(--code-border);
+  padding:1rem 1.25rem;min-height:60px;
+}
+.output-label{
+  font-size:.65rem;font-family:'Fira Code',monospace;
+  color:#166534;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;
+}
+.output-text{
+  font-family:'Fira Code',monospace;font-size:.8rem;line-height:1.85;
+  color:#4ade80;white-space:pre-wrap;word-break:break-word;
+}
+.output-text.has-error{color:#f87171}
+.output-text.empty{color:#166534;font-style:italic}
+
+/* Read-only code display */
+.code-display{
+  background:var(--code-bg);border-radius:var(--radius);
+  overflow:hidden;margin:1.25rem 0;box-shadow:var(--shadow);
+}
+.cd-top{
+  background:#1e293b;padding:10px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.cd-title{font-family:'Fira Code',monospace;font-size:.68rem;color:#64748b}
+.cd-copy{
+  background:none;border:none;color:#64748b;cursor:pointer;
+  font-size:.75rem;padding:4px 8px;border-radius:4px;transition:all .15s;
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+.cd-copy:hover{color:#e2e8f0;background:rgba(255,255,255,.08)}
+.cd-copy.copied{color:#4ade80}
+pre.code-pre{
+  background:var(--code-bg);padding:1.25rem;overflow-x:auto;margin:0;
+}
+code.code-body{
+  font-family:'Fira Code',monospace;font-size:.8rem;line-height:1.85;
+}
+/* syntax */
+.kw{color:#fb923c}.fn{color:#93c5fd}.str{color:#86efac}
+.num{color:#fca5a5}.cm{color:#475569;font-style:italic}
+.var{color:#e2e8f0}.op{color:#67e8f9}.bi{color:#d8b4fe}
+.fmt{color:#fde68a}
+
+/* ─── QUIZZES ─── */
+.quiz-block{
+  background:var(--ink);border-radius:var(--radius);
+  padding:1.25rem;margin:1.25rem 0;
+  border:2px solid rgba(15,118,110,.4);
+}
+.quiz-label{
+  font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--teal-l);margin-bottom:.75rem;
+  display:flex;align-items:center;gap:8px;
+}
+.quiz-label::before{
+  content:'';width:20px;height:20px;background:var(--teal);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+}
+.quiz-q{
+  color:#f1f5f9;font-size:.9rem;font-weight:600;
+  margin-bottom:.875rem;line-height:1.5;
+}
+.quiz-code-block{
+  background:#0a0f1a;border:1px solid #1e293b;border-radius:8px;
+  padding:1rem 1.25rem;margin:.75rem 0;
+  font-family:'Fira Code',monospace;font-size:.8rem;
+  color:#e2e8f0;line-height:1.85;
+}
+.quiz-opts{display:flex;flex-direction:column;gap:.5rem;margin-top:.75rem}
+.quiz-opt{
+  background:#1e293b;border:1.5px solid #334155;color:#94a3b8;
+  padding:10px 16px;border-radius:8px;cursor:pointer;
+  font-size:.875rem;font-weight:500;text-align:left;
+  transition:all .15s;font-family:'Plus Jakarta Sans',sans-serif;
+  min-height:44px;touch-action:manipulation;
+}
+.quiz-opt:hover:not(:disabled){border-color:var(--teal);color:#e2e8f0;background:#243447}
+.quiz-opt.correct{background:rgba(5,150,105,.15);border-color:#059669;color:#6ee7b7}
+.quiz-opt.wrong{background:rgba(220,38,38,.1);border-color:#dc2626;color:#fca5a5}
+.quiz-opt:disabled{cursor:default}
+.quiz-reveal{
+  background:#111827;border:1px solid #1e293b;border-radius:8px;
+  padding:.875rem 1rem;margin-top:.75rem;
+  font-size:.85rem;color:#94a3b8;line-height:1.65;
+  display:none;
+}
+.quiz-reveal.show{display:block}
+.quiz-reveal strong{color:#e2e8f0}
+
+/* Fill-in-blank quiz */
+.fib-wrap{margin:.75rem 0}
+.fib-row{
+  display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
+  background:#0a0f1a;border:1px solid #1e293b;border-radius:8px;
+  padding:.875rem 1rem;font-family:'Fira Code',monospace;font-size:.82rem;color:#e2e8f0;
+}
+.fib-input{
+  background:#1e293b;border:1.5px solid #334155;color:#f5e642;
+  font-family:'Fira Code',monospace;font-size:.82rem;
+  padding:4px 10px;border-radius:6px;outline:none;
+  min-width:80px;width:100px;transition:border-color .15s;
+  text-align:center;
+}
+.fib-input:focus{border-color:var(--teal)}
+.fib-input.correct{border-color:#059669;background:rgba(5,150,105,.15);color:#6ee7b7}
+.fib-input.wrong{border-color:#dc2626;background:rgba(220,38,38,.1);color:#fca5a5}
+.btn-check{
+  background:var(--teal);color:white;border:none;cursor:pointer;
+  padding:8px 18px;border-radius:8px;font-size:.83rem;font-weight:700;
+  margin-top:.5rem;transition:all .15s;font-family:'Plus Jakarta Sans',sans-serif;
+  min-height:40px;touch-action:manipulation;
+}
+.btn-check:hover{background:var(--teal-d)}
+
+/* ─── CHALLENGE BOXES ─── */
+.challenge{
+  background:linear-gradient(135deg,var(--teal-bg),#e0f2fe);
+  border:1.5px solid var(--teal-l);border-radius:var(--radius);
+  padding:1.1rem 1.25rem;margin:1.25rem 0;
+}
+.challenge-head{
+  font-size:.72rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--teal);margin-bottom:.6rem;display:flex;align-items:center;gap:6px;
+}
+.challenge-head::before{content:'⚡'}
+.challenge ul{list-style:none;padding:0}
+.challenge li{
+  font-size:.875rem;color:var(--ink2);padding:4px 0;
+  display:flex;align-items:baseline;gap:8px;
+}
+.challenge li::before{content:'→';color:var(--teal);flex-shrink:0;font-weight:700}
+
+/* ─── STEPS ─── */
+.steps{margin:1rem 0}
+.step{display:flex;gap:1rem;margin-bottom:.875rem;align-items:flex-start}
+.step-n{
+  width:28px;height:28px;border-radius:50%;background:var(--teal);
+  color:white;font-family:'Fira Code',monospace;font-size:.72rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;
+}
+.step-b h4{font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:2px}
+.step-b p{font-size:.83rem;color:var(--ink3);margin:0;line-height:1.5}
+.step-b code{font-family:'Fira Code',monospace;font-size:.8em;background:var(--teal-bg);color:var(--teal);padding:1px 5px;border-radius:3px}
+
+/* ─── TOPIC OVERVIEW ─── */
+.topics-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:.875rem;margin-top:1.5rem;
+}
+.topic-card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:var(--radius);padding:1.1rem;
+  text-decoration:none;color:inherit;transition:all .2s;
+  display:block;position:relative;overflow:hidden;
+}
+.topic-card:hover{
+  transform:translateY(-3px);border-color:var(--teal);
+  box-shadow:var(--shadow-lg);
+}
+.topic-card .tc-num{
+  font-family:'Fira Code',monospace;font-size:.62rem;color:var(--ink4);
+  letter-spacing:1px;margin-bottom:5px;
+}
+.topic-card .tc-icon{font-size:1.5rem;margin-bottom:.5rem;display:block}
+.topic-card h3{font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:.25rem}
+.topic-card p{font-size:.78rem;color:var(--ink3);margin:0;line-height:1.45}
+.topic-card .tc-hot{
+  position:absolute;top:10px;right:10px;background:var(--amber);
+  color:white;font-size:.58rem;font-weight:700;padding:2px 7px;
+  border-radius:4px;font-family:'Fira Code',monospace;
+}
+
+/* ─── AUTOMATE TABS ─── */
+.auto-tabs{display:flex;gap:0;overflow-x:auto;border-bottom:2px solid var(--border);padding-bottom:0;margin-bottom:1.5rem;-webkit-overflow-scrolling:touch}
+.auto-tab{
+  padding:10px 16px;white-space:nowrap;font-size:.83rem;font-weight:600;
+  color:var(--ink3);cursor:pointer;border-bottom:3px solid transparent;
+  margin-bottom:-2px;background:none;border-top:none;border-left:none;border-right:none;
+  transition:all .15s;font-family:'Plus Jakarta Sans',sans-serif;
+  min-height:44px;touch-action:manipulation;
+}
+.auto-tab.active{color:var(--teal);border-bottom-color:var(--teal);font-weight:700}
+.auto-tab:hover:not(.active){color:var(--ink)}
+.auto-content{display:none}
+.auto-content.active{display:block}
+.auto-use{
+  background:var(--teal-bg);border:1px solid var(--teal-l);
+  border-radius:8px;padding:.75rem 1rem;margin:.75rem 0;
+}
+.au-label{font-size:.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:3px}
+.auto-use p{font-size:.83rem;color:var(--ink2);margin:0}
+
+/* ─── AI 2026 ─── */
+.ai-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;margin:1.5rem 0}
+.ai-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:1.25rem}
+.ai-dot{width:10px;height:10px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;display:inline-block;margin-right:8px}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.ai-card h4{font-size:.95rem;font-weight:700;margin-bottom:.5rem}
+.ai-card p{font-size:.83rem;color:var(--ink3);margin:0;line-height:1.6}
+
+/* ─── RESOURCES ─── */
+.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.875rem;margin-top:1.5rem}
+.res-card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:var(--radius);padding:1rem;
+  text-decoration:none;color:inherit;transition:all .2s;display:block;
+}
+.res-card:hover{border-color:var(--teal);transform:translateY(-2px);box-shadow:var(--shadow)}
+.rc-cat{font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+.res-card h4{font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:3px}
+.res-card p{font-size:.77rem;color:var(--ink3);margin:0}
+
+/* ─── PROGRESS TOAST ─── */
+.toast{
+  position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--teal);color:white;padding:10px 20px;border-radius:20px;
+  font-size:.85rem;font-weight:600;z-index:600;transition:transform .3s;
+  pointer-events:none;white-space:nowrap;box-shadow:var(--shadow-lg);
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ─── MOBILE NAV LINKS (desktop sidebar) ─── */
+.nav-colab{
+  background:var(--amber);color:white;border:none;cursor:pointer;
+  padding:7px 14px;border-radius:6px;font-size:.78rem;font-weight:700;
+  text-decoration:none;display:flex;align-items:center;gap:5px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  touch-action:manipulation;
+}
+.nav-colab:hover{background:#b45309}
+
+/* ─── METHOD PILLS ─── */
+.mpills{display:flex;flex-wrap:wrap;gap:.4rem;margin:.75rem 0}
+.mpill{
+  background:var(--teal-bg);border:1px solid var(--teal-l);
+  color:var(--teal);padding:4px 12px;border-radius:20px;
+  font-family:'Fira Code',monospace;font-size:.72rem;
+  cursor:default;transition:all .15s;
+}
+.mpill:hover{background:var(--teal);color:white}
+
+/* ─── FOOTER ─── */
+footer{
+  background:var(--ink);color:#475569;
+  padding:2.5rem 1.5rem;text-align:center;
+}
+.footer-brand{font-weight:800;font-size:1.1rem;color:white;margin-bottom:.5rem}
+footer p{font-size:.8rem;line-height:1.7}
+footer strong{color:#94a3b8}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px){
+  .sidebar{display:none}
+  .nav-right .nav-colab{display:none}
+}
+@media(max-width:640px){
+  .hamburger{display:flex}
+  .nav-right .nav-progress-ring{display:none}
+  .hero{padding:2.5rem 1rem 2rem}
+  .section{padding:1.75rem 1rem}
+  .section+.section{padding-top:0}
+  .hero-stats{grid-template-columns:repeat(3,1fr)}
+  .dtype-grid{grid-template-columns:repeat(2,1fr)}
+  .topics-grid{grid-template-columns:repeat(2,1fr)}
+  .ai-cards{grid-template-columns:1fr}
+  .res-grid{grid-template-columns:1fr}
+  .auto-tabs{gap:0}
+  .auto-tab{padding:8px 12px;font-size:.8rem}
+  .code-textarea{font-size:.75rem}
+  .quiz-q{font-size:.85rem}
+  .quiz-opt{font-size:.83rem}
+  table{font-size:.8rem}
+  th,td{padding:8px 10px}
+}
+@media(max-width:380px){
+  .hero h1{font-size:1.6rem}
+  .dtype-grid{grid-template-columns:1fr 1fr}
+  .topics-grid{grid-template-columns:1fr 1fr}
+}
+
+/* Reveal animation */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease}
+.reveal.visible{opacity:1;transform:none}
+
+/* Section labels */
+.section-label{
+  font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--teal);margin-bottom:.5rem;
+}
+.section-title{
+  font-size:clamp(1.5rem,4vw,2.2rem);font-weight:800;
+  letter-spacing:-.03em;color:var(--ink);margin-bottom:.5rem;
+}
+.section-sub{font-size:.95rem;color:var(--ink3);max-width:580px;line-height:1.6}
+
+/* Lesson completion button */
+.mark-done{
+  display:flex;align-items:center;gap:8px;
+  background:var(--white);border:1.5px solid var(--border);
+  color:var(--ink3);padding:9px 18px;border-radius:8px;
+  cursor:pointer;font-size:.83rem;font-weight:600;
+  margin-top:1.5rem;transition:all .2s;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  min-height:44px;touch-action:manipulation;
+}
+.mark-done:hover{border-color:var(--green);color:var(--green)}
+.mark-done.done{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+
+/* Lesson divider */
+.lesson-sep{height:2px;background:linear-gradient(90deg,var(--teal),transparent);margin:2.5rem 0 0;border:none}
+</style>
 </head>
 <body>
-<div id="root"></div>
+<!-- Skulpt fallback banner — shown only if all CDNs fail -->
+<div id="py-fallback-banner" style="display:none;background:#fef3c7;border-bottom:2px solid #d97706;padding:.75rem 1.5rem;align-items:center;gap:1rem;flex-wrap:wrap;font-size:.875rem;position:sticky;top:60px;z-index:490">
+  <span style="font-size:1.2rem">⚠️</span>
+  <span><strong>Python engine failed to load</strong> — you need an internet connection for the live editors. All code examples still work in <a href="https://colab.research.google.com" target="_blank" style="color:#b45309;font-weight:700">Google Colab ↗</a></span>
+  <button onclick="this.parentElement.style.display='none'" style="margin-left:auto;background:none;border:1px solid #d97706;border-radius:6px;padding:4px 12px;cursor:pointer;color:#92400e;font-weight:600">Dismiss</button>
+</div>
+
+
+<!-- Progress bar -->
+<div id="top-progress"><div id="top-fill"></div></div>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a href="#hero" class="nav-brand">
+    <div class="nav-logo-icon">py</div>
+    <div class="nav-logo-text">
+      Python Zero to Hero
+      <small>2026 Interactive Edition</small>
+    </div>
+  </a>
+  <div class="nav-right">
+    <a href="https://colab.research.google.com" target="_blank" class="nav-colab">Open Colab ↗</a>
+    <div class="nav-progress-ring">
+      <svg class="progress-ring" viewBox="0 0 32 32">
+        <circle class="progress-ring-bg" cx="16" cy="16" r="13"/>
+        <circle class="progress-ring-fill" id="ring-fill" cx="16" cy="16" r="13"
+          stroke-dasharray="81.7" stroke-dashoffset="81.7"/>
+      </svg>
+      <span id="progress-text">0/9</span>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE DRAWER -->
+<div class="drawer-overlay" id="drawer-overlay"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <strong style="font-size:.9rem">Lessons</strong>
+    <button class="drawer-close" id="drawer-close">✕</button>
+  </div>
+  <a href="#lesson-1" class="drawer-link" data-lesson="1"><span class="dl-icon">📦</span>Variables & Types<div class="dl-check">✓</div></a>
+  <a href="#lesson-2" class="drawer-link" data-lesson="2"><span class="dl-icon">📝</span>Strings<div class="dl-check">✓</div></a>
+  <a href="#lesson-3" class="drawer-link" data-lesson="3"><span class="dl-icon">🔢</span>Operators<div class="dl-check">✓</div></a>
+  <a href="#lesson-4" class="drawer-link" data-lesson="4"><span class="dl-icon">🗂️</span>Collections<div class="dl-check">✓</div></a>
+  <a href="#lesson-5" class="drawer-link" data-lesson="5"><span class="dl-icon">🚦</span>Conditionals<div class="dl-check">✓</div></a>
+  <a href="#lesson-6" class="drawer-link" data-lesson="6"><span class="dl-icon">🔁</span>Loops<div class="dl-check">✓</div></a>
+  <a href="#lesson-7" class="drawer-link" data-lesson="7"><span class="dl-icon">⚙️</span>Functions<div class="dl-check">✓</div></a>
+  <a href="#lesson-8" class="drawer-link" data-lesson="8"><span class="dl-icon">🛡️</span>Error Handling<div class="dl-check">✓</div></a>
+  <a href="#lesson-9" class="drawer-link" data-lesson="9"><span class="dl-icon">📐</span>NumPy & Pandas<div class="dl-check">✓</div></a>
+  <div style="height:1px;background:var(--border);margin:8px 0"></div>
+  <a href="#automate" class="drawer-link" style="color:var(--amber)"><span class="dl-icon">🤖</span>Automate Stuff</a>
+  <a href="#ai2026" class="drawer-link" style="color:var(--green)"><span class="dl-icon">✨</span>Python × AI</a>
+  <div style="margin-top:auto;padding-top:1rem">
+    <a href="https://colab.research.google.com" target="_blank"
+      style="display:block;text-align:center;background:var(--amber);color:white;padding:10px;border-radius:8px;font-weight:700;font-size:.85rem;text-decoration:none">
+      Open Google Colab ↗
+    </a>
+  </div>
+</div>
+
+<!-- PAGE WRAP -->
+<div class="page-wrap">
+
+  <!-- DESKTOP SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section">Core Lessons</div>
+    <a href="#lesson-1" class="sidebar-link" data-lesson="1"><div class="sl-num">1</div>Variables & Types</a>
+    <a href="#lesson-2" class="sidebar-link" data-lesson="2"><div class="sl-num">2</div>Strings</a>
+    <a href="#lesson-3" class="sidebar-link" data-lesson="3"><div class="sl-num">3</div>Operators</a>
+    <a href="#lesson-4" class="sidebar-link" data-lesson="4"><div class="sl-num">4</div>Collections</a>
+    <a href="#lesson-5" class="sidebar-link" data-lesson="5"><div class="sl-num">5</div>Conditionals</a>
+    <a href="#lesson-6" class="sidebar-link" data-lesson="6"><div class="sl-num">6</div>Loops</a>
+    <a href="#lesson-7" class="sidebar-link" data-lesson="7"><div class="sl-num">7</div>Functions</a>
+    <a href="#lesson-8" class="sidebar-link" data-lesson="8"><div class="sl-num">8</div>Error Handling</a>
+    <a href="#lesson-9" class="sidebar-link" data-lesson="9"><div class="sl-num">9</div>NumPy & Pandas</a>
+    <div class="sidebar-section">Bonus</div>
+    <a href="#automate" class="sidebar-link" style="color:var(--amber)"><div class="sl-num" style="border-color:var(--amber)">★</div>Automate Stuff</a>
+    <a href="#ai2026" class="sidebar-link" style="color:var(--green)"><div class="sl-num" style="border-color:var(--green)">✨</div>Python × AI</a>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- ═══ HERO ═══ -->
+    <section class="hero" id="hero">
+      <div class="hero-inner">
+        <div class="hero-badge">📅 2026 Edition · Python 3.14 · By Ajay Choudhary</div>
+        <h1>Learn Python.<br><em>Run It Right Here.</em></h1>
+        <p class="hero-sub">A complete beginner's guide with <strong>live, runnable code editors</strong> in every lesson. No setup, no downloads — just type and run Python directly in your browser.</p>
+        <div class="hero-chips">
+          <span class="chip">✅ Run code in browser</span>
+          <span class="chip">🎯 Interactive quizzes</span>
+          <span class="chip">📱 Mobile friendly</span>
+          <span class="chip">🏫 Institution ready</span>
+          <span class="chip">9 lessons + bonus</span>
+        </div>
+        <div class="hero-stats">
+          <div class="hs"><div class="hs-num">9</div><div class="hs-label">Core Lessons</div></div>
+          <div class="hs"><div class="hs-num">30+</div><div class="hs-label">Code Examples</div></div>
+          <div class="hs"><div class="hs-num">0</div><div class="hs-label">Setup Needed</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CURRICULUM OVERVIEW ═══ -->
+    <div class="section reveal">
+      <p class="section-label">Start Here</p>
+      <h2 class="section-title">What you'll learn</h2>
+      <p class="section-sub">Every lesson has a live Python editor — edit the code, hit Run, see what happens. Learning by doing is the only way that sticks.</p>
+      <div class="topics-grid">
+        <a href="#lesson-1" class="topic-card reveal"><span class="tc-icon">📦</span><div class="tc-num">01</div><h3>Variables & Types</h3><p>int, float, str, bool</p></a>
+        <a href="#lesson-2" class="topic-card reveal"><span class="tc-icon">📝</span><div class="tc-num">02</div><h3>Strings</h3><p>f-strings, slicing, methods</p></a>
+        <a href="#lesson-3" class="topic-card reveal"><span class="tc-icon">🔢</span><div class="tc-num">03</div><h3>Operators</h3><p>Math, comparison, logic</p></a>
+        <a href="#lesson-4" class="topic-card reveal"><span class="tc-icon">🗂️</span><div class="tc-num">04</div><h3>Collections</h3><p>Lists, tuples, dicts</p></a>
+        <a href="#lesson-5" class="topic-card reveal"><span class="tc-icon">🚦</span><div class="tc-num">05</div><h3>Conditionals</h3><p>if / elif / else</p></a>
+        <a href="#lesson-6" class="topic-card reveal"><span class="tc-icon">🔁</span><div class="tc-num">06</div><h3>Loops</h3><p>for, while, comprehensions</p></a>
+        <a href="#lesson-7" class="topic-card reveal"><span class="tc-icon">⚙️</span><div class="tc-num">07</div><h3>Functions</h3><p>def, return, lambda</p></a>
+        <a href="#lesson-8" class="topic-card reveal"><span class="tc-icon">🛡️</span><div class="tc-num">08</div><h3>Error Handling</h3><p>try / except / finally</p></a>
+        <a href="#lesson-9" class="topic-card reveal"><span class="tc-icon">📐</span><div class="tc-num">09</div><h3>NumPy & Pandas</h3><p>Arrays, DataFrames</p></a>
+        <a href="#automate" class="topic-card reveal" style="border-color:var(--amber);background:var(--amber-bg)">
+          <div class="tc-hot">HOT</div><span class="tc-icon">🤖</span><div class="tc-num">BONUS</div><h3>Automate Stuff</h3><p>Files, Excel, web, emails</p>
+        </a>
+        <a href="#ai2026" class="topic-card reveal" style="border-color:var(--green);background:var(--green-bg)">
+          <div class="tc-hot" style="background:var(--green)">NEW</div><span class="tc-icon">✨</span><div class="tc-num">2026</div><h3>Python × AI</h3><p>Call LLM APIs from Python</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- ═══ LESSON 1: VARIABLES ═══ -->
+    <hr class="lesson-sep">
+    <div class="section" id="lesson-1">
+      <div class="lesson-hd reveal">
+        <div class="lesson-icon" style="background:#dbeafe">📦</div>
+        <div class="lesson-title">
+          <span class="lesson-badge-pill">Lesson 01</span>
+          <h2>Variables & Data Types</h2>
+          <div class="sub">The building blocks — every program starts here</div>
+        </div>
+      </div>
+
+      <p class="prose reveal">A <strong>variable</strong> is a named box that holds a value. Python has 5 essential data types you'll use constantly:</p>
+
+      <div class="dtype-grid reveal">
+        <div class="dtype-card dt-int"><div class="dn">int</div><h4>Integer</h4><p>Whole numbers</p><div class="dex">42 · -7 · 0</div></div>
+        <div class="dtype-card dt-float"><div class="dn">float</div><h4>Float</h4><p>Decimals</p><div class="dex">3.14 · 9.8</div></div>
+        <div class="dtype-card dt-str"><div class="dn">str</div><h4>String</h4><p>Text</p><div class="dex">"hello"</div></div>
+        <div class="dtype-card dt-bool"><div class="dn">bool</div><h4>Boolean</h4><p>True/False</p><div class="dex">True · False</div></div>
+        <div class="dtype-card dt-none"><div class="dn">None</div><h4>NoneType</h4><p>Nothing/null</p><div class="dex">None</div></div>
+      </div>
+
+      <div class="callout fun reveal">
+        <span class="callout-icon">🎮</span>
+        <div><div class="callout-head">Game Analogy</div><p>In any game: <code>lives = 3</code>, <code>player_name = "Kratos"</code>, <code>is_game_over = False</code>. These are variables. When you die: <code>lives -= 1</code>. When lives reach 0: <code>is_game_over = True</code>. That's all variables are — labels for changing values.</p></div>
+      </div>
+
+      <p class="prose reveal">🔥 <strong>Try it!</strong> Edit the code below and click <strong>▶ Run</strong> — your Python actually runs in this page:</p>
+
+      <div class="editor-wrap reveal" id="e1">
+        <div class="editor-top">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="editor-dots"><div class="ed ed-r"></div><div class="ed ed-y"></div><div class="ed ed-g"></div></div>
+            <div class="editor-label">variables.py · <span style="color:#4ade80">Live Editor</span></div>
+          </div>
+          <div class="editor-actions">
+            <button class="btn-copy" onclick="copyCode('e1')">Copy</button>
+            <button class="btn-reset" onclick="resetCode('e1')">↺ Reset</button>
+            <button class="btn-run" disabled style="opacity:.6;cursor:not-allowed" onclick="runCode('e1')">⟳ Loading Python…</button>
+          </div>
+        </div>
+        <textarea class="code-textarea" id="e1-code" spellcheck="false"># Change these values and hit Run!
+name = "Priya"
+age = 17
+gpa = 9.4
+loves_python = True
+
+print("Name:", name)
+print("Age:", age)
+print("GPA:", gpa)
+print("Loves Python?", loves_python)
+
+# type() tells you the data type
+print()
+print(type(name))    # str
+print(type(age))     # int
+print(type(gpa))     # float
+
+# 2026 Tip: underscores in big numbers for readability
+population = 1_430_000_000
+print("India population:", population)</textarea>
+        <div class="output-area" id="e1-out">
+          <div class="output-label">▶ Output</div>
+          <div class="output-text empty" id="e1-text">Press ▶ Run to execute...</div>
+        </div>
+      </div>
+
+      <!-- Quiz 1a -->
+      <div class="quiz-block reveal" id="q1a">
+        <div class="quiz-label">Mini Quiz</div>
+        <div class="quiz-q">What data type is <code style="color:#67e8f9">score = 95.5</code>?</div>
+        <div class="quiz-opts">
+          <button class="quiz-opt" onclick="mcq(this,'q1a',false)">int</button>
+          <button class="quiz-opt" onclick="mcq(this,'q1a',true)">float</button>
+          <button class="quiz-opt" onclick="mcq(this,'q1a',false)">str</button>
+          <button class="quiz-opt" onclick="mcq(this,'q1a',false)">bool</button>
+        </div>
+        <div class="quiz-reveal" id="q1a-reveal">✅ <strong>float</strong> — any number with a decimal point is a float. <code>95</code> would be int, but <code>95.5</code> has a decimal so it's float. You can verify with <code>type(95.5)</code>.</div>
+      </div>
+
+      <!-- FIB Quiz -->
+      <div class="quiz-block reveal" id="q1b">
+        <div class="quiz-label">Fill in the Blank</div>
+        <div class="quiz-q">Strings need <strong>quotes</strong>. Type your city name as a Python string value below (e.g. <code style="color:#86efac">"Mumbai"</code> or <code style="color:#86efac">'Delhi'</code>):</div>
+        <div class="fib-wrap">
+          <div class="fib-row">
+            <span style="color:#93c5fd">city</span>
+            <span style="color:#67e8f9">&nbsp;=&nbsp;</span>
+            <input class="fib-input" id="q1b-i1" placeholder='"Mumbai"' style="width:130px" autocomplete="off" autocorrect="off" spellcheck="false">
+          </div>
+        </div>
+        <div style="color:#475569;font-size:.78rem;margin:.4rem 0 .75rem;padding-left:2px">
+          👉 Wrap your answer in quotes — single <code style="color:#86efac">'...</code><code style="color:#86efac">'</code> or double <code style="color:#86efac">"..."</code>
+        </div>
+        <button class="btn-check" onclick="checkFibCity('q1b')">Check Answer</button>
+        <div class="quiz-reveal" id="q1b-reveal">✅ Strings must be wrapped in quotes — <code>'Mumbai'</code> or <code>"Mumbai"</code>. Without quotes Python reads <code>Mumbai</code> as a variable name (which doesn't exist) and throws a <strong>NameError</strong>. This is one of the most common beginner mistakes!</div>
+      </div>
+
+      <div class="challenge reveal">
+        <div class="challenge-head">Your Turn</div>
+        <ul>
+          <li>In the editor above, add a variable <code>city = "Mumbai"</code> and print it</li>
+          <li>Create a variable <code>pi = 3.14159</code> — what does <code>type(pi)</code> print?</li>
+          <li>Try: <code>x = 10</code> then <code>x = x + 5</code> then <code>print(x)</code> — what do you get?</li>
+        </ul>
+      </div>
+      <button class="mark-done" id="done-1" onclick="markDone(1)">✓ Mark Lesson 1 Complete</button>
+    </div>
+
+    <!-- ═══ LESSON 2: STRINGS ═══ -->
+    <hr class="lesson-sep">
+    <div class="section" id="lesson-2">
+      <div class="lesson-hd reveal">
+        <div class="lesson-icon" style="background:#dcfce7">📝</div>
+        <div class="lesson-title">
+          <span class="lesson-badge-pill">Lesson 02</span>
+          <h2>Strings & Text</h2>
+          <div class="sub">Text is everywhere — master it</div>
+        </div>
+      </div>
+
+      <p class="prose reveal">Strings are text values. They're the most-used data type in real programs — every username, tweet, file name, AI response is a string. Python has powerful tools to work with them.</p>
+
+      <div class="callout tip reveal">
+        <span class="callout-icon">💡</span>
+        <div><div class="callout-head">f-strings — the modern way</div><p>Instead of <code>"Hello " + name</code>, use <code>f"Hello {name}"</code>. The <code>f</code> prefix and <code>{}</code> curly braces automatically insert any variable or expression. This is the standard in 2026.</p></div>
+      </div>
+
+      <div class="editor-wrap reveal" id="e2">
+        <div class="editor-top">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="editor-dots"><div class="ed ed-r"></div><div class="ed ed-y"></div><div class="ed ed-g"></div></div>
+            <div class="editor-label">strings.py · <span style="color:#4ade80">Live Editor</span></div>
+          </div>
+          <div class="editor-actions">
+            <button class="btn-copy" onclick="copyCode('e2')">Copy</button>
+            <button class="btn-reset" onclick="resetCode('e2')">↺ Reset</button>
+            <button class="btn-run" disabled style="opacity:.6;cursor:not-allowed" onclick="runCode('e2')">⟳ Loading Python…</button>
+          </div>
+        </div>
+        <textarea class="code-textarea" id="e2-code" spellcheck="false">name  = "Arjun"
+score = 94.5
+
+# f-strings: embed variables directly in text
+print(f"Hello, {name}!")
+print(f"{name} scored {score:.1f}%")   # .1f = 1 decimal place
+
+# String slicing (0-indexed!)
+lang = "Python3.14"
+print(lang[0])       # first character
+print(lang[-1])      # last character
+print(lang[:6])      # first 6 characters
+print(lang[::-1])    # reversed!
+
+# Useful string methods
+email = "  Priya.Sharma@Gmail.COM  "
+clean = email.strip().lower()
+print(clean)
+print(clean.split("@"))      # split into parts
+print(clean.replace("gmail","iitd"))
+print("hello world".title()) # Title Case
+
+# Check properties
+print("12345".isdigit())     # True
+print("hello".upper())       # HELLO</textarea>
+        <div class="output-area" id="e2-out">
+          <div class="output-label">▶ Output</div>
+          <div class="output-text empty" id="e2-text">Press ▶ Run to execute...</div>
+        </div>
+      </div>
+
+      <p class="prose reveal">Essential string methods to memorise:</p>
+      <div class="mpills reveal">
+        <span class="mpill">.upper()</span><span class="mpill">.lower()</span>
+        <span class="mpill">.strip()</span><span class="mpill">.split()</span>
+        <span class="mpill">.replace()</span><span class="mpill">.find()</span>
+        <span class="mpill">.startswith()</span><span class="mpill">.endswith()</span>
+        <span class="mpill">.count()</span><span class="mpill">.join()</span>
+        <span class="mpill">.title()</span><span class="mpill">.isdigit()</span>
+        <span class="mpill">.format()</span><span class="mpill">.zfill()</span>
+      </div>
+
+      <div class="quiz-block reveal" id="q2a">
+        <div class="quiz-label">Mini Quiz</div>
+        <div class="quiz-q">What does <code style="color:#67e8f9">"Python"[::-1]</code> return?</div>
+        <div class="quiz-opts">
+          <button class="quiz-opt" onclick="mcq(this,'q2a',false)">Python</button>
+          <button class="quiz-opt" onclick="mcq(this,'q2a',true)">nohtyP</button>
+          <button class="quiz-opt" onclick="mcq(this,'q2a',false)">P</button>
+          <button class="quiz-opt" onclick="mcq(this,'q2a',false)">Error</button>
+        </div>
+        <div class="quiz-reveal" id="q2a-reveal">✅ <strong>nohtyP</strong> — the slice <code>[::-1]</code> means "start at end, go backwards, step -1". It reverses any string or list. Try it in the editor above: <code>print("racecar"[::-1])</code> — what do you notice?</div>
+      </div>
+
+      <div class="quiz-block reveal" id="q2b">
+        <div class="quiz-label">Fill in the Blank</div>
+        <div class="quiz-q">Which method removes spaces from both ends of a string?</div>
+        <div class="fib-wrap">
+          <div class="fib-row">
+            <span style="color:#93c5fd">"  hello  "</span>
+            <span style="color:#67e8f9">.</span>
+            <input class="fib-input" id="q2b-i1" placeholder="???()">
+          </div>
+        </div>
+        <button class="btn-check" onclick="checkFib('q2b',['strip()','strip'])">Check</button>
+        <div class="quiz-reveal" id="q2b-reveal">✅ <strong>.strip()</strong> removes whitespace (spaces, tabs, newlines) from both sides. Use <code>.lstrip()</code> for left only, <code>.rstrip()</code> for right only. Essential for cleaning messy data!</div>
+      </div>
+      <button class="mark-done" id="done-2" onclick="markDone(2)">✓ Mark Lesson 2 Complete</button>
+    </div>
+
+    <!-- ═══ LESSON 3: OPERATORS ═══ -->
+    <hr class="lesson-sep">
+    <div class="section" id="lesson-3">
+      <div class="lesson-hd reveal">
+        <div class="lesson-icon" style="background:#fef9c3">🔢</div>
+        <div class="lesson-title">
+          <span class="lesson-badge-pill">Lesson 03</span>
+          <h2>Operators</h2>
+          <div class="sub">Do math, make comparisons, combine logic</div>
+        </div>
+      </div>
+
+      <div class="table-wrap reveal">
+        <table>
+          <thead><tr><th>Symbol</th><th>Name</th><th>Example</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td><span class="sym">+  -  *</span></td><td>Add, Sub, Multiply</td><td><code>5+3</code></td><td>8</td></tr>
+            <tr><td><span class="sym">/</span></td><td>Divide (always float)</td><td><code>7/2</code></td><td>3.5</td></tr>
+            <tr><td><span class="sym">//</span></td><td>Floor divide (int)</td><td><code>7//2</code></td><td>3</td></tr>
+            <tr><td><span class="sym">%</span></td><td>Modulo (remainder)</td><td><code>7%2</code></td><td>1</td></tr>
+            <tr><td><span class="sym">**</span></td><td>Power</td><td><code>2**10</code></td><td>1024</td></tr>
+            <tr><td><span class="sym">==  !=</span></td><td>Equal / Not equal</td><td><code>5==5</code></td><td><span class="badge bg">True</span></td></tr>
+            <tr><td><span class="sym">&gt;  &lt;  &gt;=  &lt;=</span></td><td>Comparisons</td><td><code>10&gt;5</code></td><td><span class="badge bg">True</span></td></tr>
+            <tr><td><span class="sym">and  or  not</span></td><td>Logic</td><td><code>T and F</code></td><td><span class="badge br">False</span></td></tr>
+            <tr><td><span class="sym">in</span></td><td>Membership</td><td><code>'a' in 'cat'</code></td><td><span class="badge bg">True</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn reveal">
+        <span class="callout-icon">⚠️</span>
+        <div><div class="callout-head">Classic Mistake</div><p><code>=</code> assigns a value. <code>==</code> compares two values. Writing <code>if x = 5:</code> causes a <strong>SyntaxError</strong>. Every beginner makes this exactly once — now you won't!</p></div>
+      </div>
+
+      <div class="editor-wrap reveal" id="e3">
+        <div class="editor-top">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="editor-dots"><div class="ed ed-r"></div><div class="ed ed-y"></div><div class="ed ed-g"></div></div>
+            <div class="editor-label">operators.py · <span style="color:#4ade80">Live Editor</span></div>
+          </div>
+          <div class="editor-actions">
+            <button class="btn-copy" onclick="copyCode('e3')">Copy</button>
+            <button class="btn-reset" onclick="resetCode('e3')">↺ Reset</button>
+            <button class="btn-run" disabled style="opacity:.6;cursor:not-allowed" onclick="runCode('e3')">⟳ Loading Python…</button>
+          </div>
+        </div>
+        <textarea class="code-textarea" id="e3-code" spellcheck="false"># Arithmetic — try changing the values!
+a, b = 15, 4
+print(a + b)      # 19
+print(a - b)      # 11
+print(a * b)      # 60
+print(a / b)      # 3.75  (always float)
+print(a // b)     # 3     (floor: drops decimal)
+print(a % b)      # 3     (remainder)
+print(2 ** 10)    # 1024  (2 to the power 10)
+
+# Comparisons return True or False
+print()
+print(10 > 5)          # True
+print(10 == 10)        # True
+print(10 != 5)         # True
+print(5 >= 5)          # True
+
+# Logical operators
+age = 17
+has_id = True
+print(age >= 18 or has_id)    # True (one is True)
+print(age >= 18 and has_id)   # False (both must be True)
+
+# 'in' operator
+fruits = ["apple", "banana", "mango"]
+print("mango" in fruits)      # True
+print("z" in "Python")        # False</textarea>
+        <div class="output-area" id="e3-out">
+          <div class="output-label">▶ Output</div>
+          <div class="output-text empty" id="e3-text">Press ▶ Run to execute...</div>
+        </div>
+      </div>
+
+      <div class="quiz-block reveal" id="q3a">
+        <div class="quiz-label">Guess the Output</div>
+        <div class="quiz-q">What does this print?</div>
+        <div class="quiz-code-block">x = 10<br>print(x // 3, x % 3)</div>
+        <div class="quiz-opts">
+          <button class="quiz-opt" onclick="mcq(this,'q3a',false)">3.33  1</button>
+          <button class="quiz-opt" onclick="mcq(this,'q3a',true)">3  1</button>
+          <button class="quiz-opt" onclick="mcq(this,'q3a',false)">3  0</button>
+          <button class="quiz-opt" onclick="mcq(this,'q3a',false)">Error</button>
+        </div>
+        <div class="quiz-reveal" id="q3a-reveal">✅ <strong>3  1</strong> — <code>10 // 3</code> = 3 (floor division, drops .33). <code>10 % 3</code> = 1 (remainder: 10 = 3×3 + 1). The modulo operator is super useful — it tells you if a number is even (<code>n % 2 == 0</code>) or divisible by anything.</div>
+      </div>
+      <button class="mark-done" id="done-3" onclick="markDone(3)">✓ Mark Lesson 3 Complete</button>
+    </div>
+
+    <!-- ═══ LESSON 4: COLLECTIONS ═══ -->
+    <hr class="lesson-sep">
+    <div class="section" id="lesson-4">
+      <div class="lesson-hd reveal">
+        <div class="lesson-icon" style="background:#f5f3ff">🗂️</div>
+        <div class="lesson-title">
+          <span class="lesson-badge-pill">Lesson 04</span>
+          <h2>Lists, Tuples & Dicts</h2>
+          <div class="sub">Storing groups of values — the three essential containers</div>
+        </div>
+      </div>
+
+      <div class="cc-grid reveal">
+        <div class="cc"><h4>📋 List [ ]</h4><p>Ordered, changeable. For sequences: scores, names, items.</p></div>
+        <div class="cc"><h4>🔒 Tuple ( )</h4><p>Ordered, <em>frozen</em>. For fixed data: coordinates, RGB.</p></div>
+        <div class="cc"><h4>📖 Dict { }</h4><p>Key→Value pairs. For structured data: student records, config.</p></div>
+        <div class="cc"><h4>🎲 Set { }</h4><p>Unique values only. Great for removing duplicates.</p></div>
+      </div>
+
+      <div class="callout fun reveal">
+        <span class="callout-icon">🛒</span>
+        <div><div class="callout-head">Analogy</div><p>A <strong>list</strong> is a shopping list — ordered, you can add/remove items. A <strong>dict</strong> is a phonebook — you look up a <em>name</em> (key) to get a <em>number</em> (value). A <strong>tuple</strong> is your date of birth — fixed, never changes.</p></div>
+      </div>
+
+      <div class="editor-wrap reveal" id="e4">
+        <div class="editor-top">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="editor-dots"><div class="ed ed-r"></div><div class="ed ed-y"></div><div class="ed ed-g"></div></div>
+            <div class="editor-label">collections.py · <span style="color:#4ade80">Live Editor</span></div>
+          </div>
+          <div class="editor-actions">
+            <button class="btn-copy" onclick="copyCode('e4')">Copy</button>
+            <button class="btn-reset" onclick="resetCode('e4')">↺ Reset</button>
+            <button class="btn-run" disabled style="opacity:.6;cursor:not-allowed" onclick="runCode('e4')">⟳ Loading Python…</button>
+          </div>
+        </div>
+        <textarea class="code-textarea" id="e4-code" spellcheck="false">## ── LISTS ──
+scores = [85, 92, 78, 96, 88]
+print("All scores:", scores)
+print("First:", scores[0])      # 0-indexed!
+print("Last:", scores[-1])      # -1 = last
+print("Top 3:", scores[:3])     # slicing
+
+scores.append(95)       # add to end
+scores.remove(78)       # remove by value
+scores.sort(reverse=True)
+print("Sorted:", scores)
+print("Count:", len(scores))
+
+## ── DICTIONARY ──
+student = {
+    "name"  : "Ananya",
+    "class" : 11,
+    "gpa"   : 9.4,
+    "city"  : "Mumbai"
+}
+print()
+print(student["name"])             # access by key
+student["gpa"] = 9.7               # update a value
+student["hobby"] = "coding"        # add new key
+print(student.get("age", "N/A"))   # safe access, no crash
+
+# Loop over a dictionary
+for key, value in student.items():
+    print(f"  {key}: {value}")</textarea>
+        <div class="output-area" id="e4-out">
+          <div class="output-label">▶ Output</div>
+          <div class="output-text empty" id="e4-text">Press ▶ Run to execute...</div>
+        </div>
+      </div>
+
+      <div class="quiz-block reveal" id="q4a">
+        <div class="quiz-label">Guess the Output</div>
+        <div class="quiz-q">What does this print?</div>
+        <div class="quiz-code-block">nums = [10, 20, 30, 40, 50]<br>print(nums[1:4])</div>
+        <div class="quiz-opts">
+          <button class="quiz-opt" onclick="mcq(this,'q4a',false)">[10, 20, 30]</button>
+          <button class="quiz-opt" onclick="mcq(this,'q4a',true)">[20, 30, 40]</button>
+          <button class="quiz-opt" onclick="mcq(this,'q4a',false)">[20, 30, 40, 50]</button>
+          <button class="quiz-opt" onclick="mcq(this,'q4a',false)">[10, 20, 30, 40]</button>
+        </div>
+        <div class="quiz-reveal" id="q4a-reveal">✅ <strong>[20, 30, 40]</strong> — Slicing <code>[1:4]</code> means "start at index 1, stop BEFORE index 4". Index 1=20, 2=30, 3=40. Index 4 is NOT included. This trips everyone up — the end index is always exclusive.</div>
+      </div>
+      <button class="mark-done" id="done-4" onclick="markDone(4)">✓ Mark Lesson 4 Complete</button>
+    </div>
+
+    <!-- ═══ LESSON 5: CONDITIONALS ═══ -->
+    <hr class="lesson-sep">
+    <div class="section" id="lesson-5">
+      <div class="lesson-hd reveal">
+        <div class="lesson-icon" style="background:#fce7f3">🚦</div>
+        <div class="lesson-title">
+          <span class="lesson-badge-pill">Lesson 05</span>
+          <h2>Conditionals</h2>
+          <div class="sub">Teaching your code to make decisions</div>
+        </div>
+      </div>
+
+      <div class="callout fun reveal">
+        <span class="callout-icon">📱</span>
+        <div><div class="callout-head">Every app uses this</div><p>Zomato: <em>if restaurant is open</em> → show order button. Instagram: <em>if follower count &gt; 10,000</em> → show "Creator" badge. Spotify: <em>if premium</em> → no ads. Same structure, infinite uses.</p></div>
+      </div>
+
+      <div class="callout note reveal">
+        <span class="callout-icon">📌</span>
+        <div><div class="callout-head">Indentation is EVERYTHING</div><p>Python uses spaces/tabs to group code. The lines inside an <code>if</code> block <strong>must be indented</strong> (4 spaces or 1 Tab). Missing indentation = SyntaxError. This is different from most other languages.</p></div>
+      </div>
+
+      <div class="editor-wrap reveal" id="e5">
+        <div class="editor-top">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="editor-dots"><div class="ed ed-r"></div><div class="ed ed-y"></div><div class="ed ed-g"></div></div>
+            <div class="editor-label">conditionals.py · <span style="color:#4ade80">Live Editor — try different values!</span></div>
+          </div>
+          <div class="editor-actions">
+            <button class="btn-copy" onclick="copyCode('e5')">Copy</button>
+            <button class="btn-reset" onclick="resetCode('e5')">↺ Reset</button>
+            <button class="btn-run" disabled style="opacity:.6;cursor:not-allowed" onclick="runCode('e5')">⟳ Loading Python…</button>
+          </div>
+        </div>
+        <textarea class="code-textarea" id="e5-code" spellcheck="false"># Change 'score' and see how the output changes!
+score = 82
+
+if   score >= 90: print("A — Outstanding! 🌟")
+elif score >= 75: print("B — Good work! 👍")
+elif score >= 60: print("C — Passing 📚")
+else:             print("D — Study harder 😅")
+
+# One-liner (ternary expression)
+result = "Pass" if score >= 33 else "Fail"
+print(f"Result: {result}")
+
+# Nested conditions
+age = 17
+has_id = True
+with_adult = True
+
+if age >= 18:
+    print("Entry allowed (adult)")
+elif has_id and with_adult:
+    print("Entry allowed (minor with ID + guardian)")
+else:
+    print("Entry denied")
+
+# Spam detector using 'in'
+banned = ["spam", "scam", "fake", "free money"]
+message = "Win free money now!"
+if any(word in message.lower() for word in banned):
+    print("⚠️  Spam detected!")</textarea>
+        <div class="output-area" id="e5-out">
+          <div class="output-label">▶ Output</div>
+          <div class="output-text empty" id="e5-text">Press ▶ Run to execute...</div>
+        </div>
+      </div>
+
+      <div class="quiz-block reveal" id="q5a">
+        <div class="quiz-label">Guess the Output</div>
+        <div class="quiz-q">What gets printed?</div>
+        <div class="quiz-code-block">x = 5<br>print("yes" if x &gt; 3 and x &lt; 10 else "no")</div>
+        <div class="quiz-opts">
+          <button class="quiz-opt" onclick="mcq(this,'q5a',true)">yes</button>
+          <button class="quiz-opt" onclick="mcq(this,'q5a',false)">no</button>
+          <button class="quiz-opt" onclick="mcq(this,'q5a',false)">True</button>
+          <button class="quiz-opt" onclick="mcq(this,'q5a',false)">Error</button>
+        </div>
+        <div class="quiz-reveal" id="q5a-reveal">✅ <strong>yes</strong> — x=5, so (5&gt;3) = True AND (5&lt;10) = True. True and True = True. The ternary returns "yes". Python also lets you write this as <code>3 &lt; x &lt; 10</code> — chained comparisons work natively!</div>
+      </div>
+      <button class="mark-done" id="done-5" onclick="markDone(5)">✓ Mark Lesson 5 Complete</button>
+    </div>
+
+    <!-- ═══ LESSON 6: LOOPS ═══ -->
+    <hr class="lesson-sep">
+    <div class="section" id="lesson-6">
+      <div class="lesson-hd reveal">
+        <div class="lesson-icon" style="background:#ede9fe">🔁</div>
+        <div class="lesson-title">
+          <span class="lesson-badge-pill">Lesson 06</span>
+          <h2>Loops</h2>
+          <div class="sub">Make Python do the repetitive work — so you don't have to</div>
+        </div>
+      </div>
+
+      <div class="callout tip reveal">
+        <span class="callout-icon">🦥</span>
+        <div><div class="callout-head">The Programmer's Creed</div><p>Good programmers are <em>cleverly lazy</em>. If you've copy-pasted something more than twice, it belongs in a loop. Loops turn 1000 lines of repeated code into 3 lines.</p></div>
+      </div>
+
+      <div class="editor-wrap reveal" id="e6">
+        <div class="editor-top">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="editor-dots"><div class="ed ed-r"></div><div class="ed ed-y"></div><div class="ed ed-g"></div></div>
+            <div class="editor-label">loops.py · <span style="color:#4ade80">Live Editor</span></div>
+          </div>
+          <div class="editor-actions">
+            <button class="btn-copy" onclick="copyCode('e6')">Copy</button>
+            <button class="btn-reset" onclick="resetCode('e6')">↺ Reset</button>
+            <button class="btn-run" disabled style="opacity:.6;cursor:not-allowed" onclick="runCode('e6')">⟳ Loading Python…</button>
+          </div>
+        </div>
+        <textarea class="code-textarea" id="e6-code" spellcheck="false">## ── for loop: over a list ──
+teams = ["MI", "CSK", "RCB", "KKR"]
+for team in teams:
+    print(f"  {team} — Let's go!")
+
+## ── range() ──
+print()
+for i in range(1, 6):      # 1 2 3 4 5
+    print(f"  {i} squared = {i**2}")
+
+## ── enumerate() — gives index + value ──
+print()
+for rank, team in enumerate(teams, 1):
+    print(f"  #{rank}: {team}")
+
+## ── while loop ──
+print()
+n = 1
+while n <= 5:
+    print(f"  {n}", end=" ")
+    n += 1
+print()  # newline
+
+## ── List comprehension — Python superpower ──
+# Without: 4 lines
+squares = []
+for n in range(1, 6):
+    squares.append(n**2)
+
+# With comprehension: 1 line, same result
+squares = [n**2 for n in range(1, 6)]
+print("Squares:", squares)
+
+# Filter while building: only even squares
+even_sq = [n**2 for n in range(1, 11) if n % 2 == 0]
+print("Even squares:", even_sq)</textarea>
+        <div class="output-area" id="e6-out">
+          <div class="output-label">▶ Output</div>
+          <div class="output-text empty" id="e6-text">Press ▶ Run to execute...</div>
+        </div>
+      </div>
+
+      <div class="quiz-block reveal" id="q6a">
+        <div class="quiz-label">Guess the Output</div>
+        <div class="quiz-q">What does this print?</div>
+        <div class="quiz-code-block">result = [x for x in range(10) if x % 2 == 0]<br>print(result)</div>
+        <div class="quiz-opts">
+          <button class="quiz-opt" onclick="mcq(this,'q6a',false)">[1, 3, 5, 7, 9]</button>
+          <button class="quiz-opt" onclick="mcq(this,'q6a',true)">[0, 2, 4, 6, 8]</button>
+          <button class="quiz-opt" onclick="mcq(this,'q6a',false)">[2, 4, 6, 8, 10]</button>
+          <button class="quiz-opt" onclick="mcq(this,'q6a',false)">[1, 2, 3, 4, 5]</button>
+        </div>
+        <div class="quiz-reveal" id="q6a-reveal">✅ <strong>[0, 2, 4, 6, 8]</strong> — <code>range(10)</code> gives 0–9. The condition <code>x % 2 == 0</code> keeps only even numbers (remainder 0 when divided by 2). Note: 0 is even, and range(10) stops BEFORE 10, so 10 is excluded.</div>
+      </div>
+
+      <div class="challenge reveal">
+        <div class="challenge-head">Challenges — Try in the editor!</div>
+        <ul>
+          <li>Print a 10-row multiplication table for 7</li>
+          <li>Find all numbers from 1–100 divisible by both 3 and 5 using a list comprehension</li>
+          <li>Use a while loop to simulate flipping a coin until you get 3 heads in a row</li>
+        </ul>
+      </div>
+      <button class="mark-done" id="done-6" onclick="markDone(6)">✓ Mark Lesson 6 Complete</button>
+    </div>
+
+    <!-- ═══ LESSON 7: FUNCTIONS ═══ -->
+    <hr class="lesson-sep">
+    <div class="section" id="lesson-7">
+      <div class="lesson-hd reveal">
+        <div class="lesson-icon" style="background:#dbeafe">⚙️</div>
+        <div class="lesson-title">
+          <span class="lesson-badge-pill">Lesson 07</span>
+          <h2>Functions</h2>
+          <div class="sub">Write once, use anywhere — the DRY principle</div>
+        </div>
+      </div>
+
+      <div class="callout fun reveal">
+        <span class="callout-icon">🍕</span>
+        <div><div class="callout-head">The Recipe Analogy</div><p>A function is a recipe. You write it once, then call it whenever you need that dish — without rewriting every step. <strong>DRY = Don't Repeat Yourself</strong>. If the same code appears in 3 places, wrap it in a function.</p></div>
+      </div>
+
+      <div class="steps reveal">
+        <div class="step"><div class="step-n">1</div><div class="step-b"><h4>def keyword</h4><p>Starts the function. Followed by name and parentheses.</p></div></div>
+        <div class="step"><div class="step-n">2</div><div class="step-b"><h4>Parameters</h4><p>Input slots. Can have defaults: <code>def greet(name, lang="English")</code></p></div></div>
+        <div class="step"><div class="step-n">3</div><div class="step-b"><h4>return</h4><p>Sends a value back. Optional — without it, function returns <code>None</code>.</p></div></div>
+        <div class="step"><div class="step-n">4</div><div class="step-b"><h4>Docstring</h4><p>Description string right after <code>def</code>. Access with <code>help()</code>.</p></div></div>
+      </div>
+
+      <div class="editor-wrap reveal" id="e7">
+        <div class="editor-top">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="editor-dots"><div class="ed ed-r"></div><div class="ed ed-y"></div><div class="ed ed-g"></div></div>
+            <div class="editor-label">functions.py · <span style="color:#4ade80">Live Editor</span></div>
+          </div>
+          <div class="editor-actions">
+            <button class="btn-copy" onclick="copyCode('e7')">Copy</button>
+            <button class="btn-reset" onclick="resetCode('e7')">↺ Reset</button>
+            <button class="btn-run" disabled style="opacity:.6;cursor:not-allowed" onclick="runCode('e7')">⟳ Loading Python…</button>
+          </div>
+        </div>
+        <textarea class="code-textarea" id="e7-code" spellcheck="false">## ── Basic function ──
+def greet(name, language="English"):
+    """Returns a greeting in the given language."""
+    greetings = {
+        "English": "Hello",
+        "Hindi":   "Namaste",
+        "Tamil":   "Vanakkam"
+    }
+    word = greetings.get(language, "Hey")
+    return f"{word}, {name}!"
+
+print(greet("Priya"))
+print(greet("Arjun", "Hindi"))
+print(greet("Kavya", "Tamil"))
+
+## ── Multiple return values ──
+def stats(nums):
+    """Returns min, max, average of a list."""
+    return min(nums), max(nums), sum(nums)/len(nums)
+
+lo, hi, avg = stats([72, 85, 90, 68, 95])
+print(f"\nMin={lo}, Max={hi}, Avg={avg:.1f}")
+
+## ── Lambda: tiny one-line function ──
+square = lambda x: x ** 2
+print(f"\n7 squared = {square(7)}")
+
+## ── filter() + lambda ──
+scores = [45, 82, 91, 30, 67, 88]
+passed = list(filter(lambda s: s >= 60, scores))
+print(f"Passed: {passed}")
+print(f"Class average: {sum(scores)/len(scores):.1f}")</textarea>
+        <div class="output-area" id="e7-out">
+          <div class="output-label">▶ Output</div>
+          <div class="output-text empty" id="e7-text">Press ▶ Run to execute...</div>
+        </div>
+      </div>
+
+      <div class="quiz-block reveal" id="q7a">
+        <div class="quiz-label">Mini Quiz</div>
+        <div class="quiz-q">What does a function return if it has no <code style="color:#67e8f9">return</code> statement?</div>
+        <div class="quiz-opts">
+          <button class="quiz-opt" onclick="mcq(this,'q7a',false)">0</button>
+          <button class="quiz-opt" onclick="mcq(this,'q7a',false)">""</button>
+          <button class="quiz-opt" onclick="mcq(this,'q7a',true)">None</button>
+          <button class="quiz-opt" onclick="mcq(this,'q7a',false)">Error</button>
+        </div>
+        <div class="quiz-reveal" id="q7a-reveal">✅ <strong>None</strong> — every function in Python returns something. Without a return statement, it implicitly returns <code>None</code> (Python's "nothing"). You can test this: <code>result = print("hi")</code> → <code>print(result)</code> → <code>None</code>.</div>
+      </div>
+
+      <div class="challenge reveal">
+        <div class="challenge-head">Build These Functions</div>
+        <ul>
+          <li>A <code>bmi(weight_kg, height_m)</code> function that returns weight / height²</li>
+          <li>A <code>grade(score)</code> function returning "A", "B", "C", or "Fail"</li>
+          <li>A <code>is_palindrome(word)</code> function that returns True if word reads same backwards</li>
+        </ul>
+      </div>
+      <button class="mark-done" id="done-7" onclick="markDone(7)">✓ Mark Lesson 7 Complete</button>
+    </div>
+
+    <!-- ═══ LESSON 8: ERROR HANDLING ═══ -->
+    <hr class="lesson-sep">
+    <div class="section" id="lesson-8">
+      <div class="lesson-hd reveal">
+        <div class="lesson-icon" style="background:#fee2e2">🛡️</div>
+        <div class="lesson-title">
+          <span class="lesson-badge-pill">Lesson 08</span>
+          <h2>Error Handling</h2>
+          <div class="sub">Don't crash — handle problems gracefully</div>
+        </div>
+      </div>
+
+      <div class="callout warn reveal">
+        <span class="callout-icon">💥</span>
+        <div><div class="callout-head">Errors always happen</div><p>A user types text where you expect a number. A file doesn't exist. A website is down. Without error handling, your program <strong>crashes</strong>. With it, you catch the problem and keep going. This is what separates beginner code from production code.</p></div>
+      </div>
+
+      <div class="editor-wrap reveal" id="e8">
+        <div class="editor-top">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="editor-dots"><div class="ed ed-r"></div><div class="ed ed-y"></div><div class="ed ed-g"></div></div>
+            <div class="editor-label">errors.py · <span style="color:#4ade80">Live Editor</span></div>
+          </div>
+          <div class="editor-actions">
+            <button class="btn-copy" onclick="copyCode('e8')">Copy</button>
+            <button class="btn-reset" onclick="resetCode('e8')">↺ Reset</button>
+            <button class="btn-run" disabled style="opacity:.6;cursor:not-allowed" onclick="runCode('e8')">⟳ Loading Python…</button>
+          </div>
+        </div>
+        <textarea class="code-textarea" id="e8-code" spellcheck="false">## ── Without try/except — this CRASHES ──
+# result = 10 / 0        # ZeroDivisionError
+# int("hello")           # ValueError
+# x = {}; x["missing"]  # KeyError
+
+## ── With try/except — graceful handling ──
+def safe_divide(a, b):
+    try:
+        return a / b
+    except ZeroDivisionError:
+        print("  ❌ Can't divide by zero!")
+        return None
+
+print(safe_divide(10, 2))    # 5.0
+print(safe_divide(10, 0))    # error message
+
+## ── Handle multiple error types ──
+def parse_age(user_input):
+    try:
+        age = int(user_input)
+        if age < 0:
+            raise ValueError("Age can't be negative")
+        return age
+    except ValueError as e:
+        print(f"  ❌ Invalid: {e}")
+        return None
+    finally:
+        print("  (This always runs)")
+
+print()
+parse_age("25")
+parse_age("twenty")
+parse_age("-5")
+
+## ── Real pattern: safe list access ──
+def safe_get(lst, idx, default="Not found"):
+    try:
+        return lst[idx]
+    except IndexError:
+        return default
+
+items = ["apple", "banana", "mango"]
+print()
+print(safe_get(items, 1))    # banana
+print(safe_get(items, 99))   # Not found</textarea>
+        <div class="output-area" id="e8-out">
+          <div class="output-label">▶ Output</div>
+          <div class="output-text empty" id="e8-text">Press ▶ Run to execute...</div>
+        </div>
+      </div>
+      <button class="mark-done" id="done-8" onclick="markDone(8)">✓ Mark Lesson 8 Complete</button>
+    </div>
+
+    <!-- ═══ LESSON 9: NUMPY & PANDAS ═══ -->
+    <hr class="lesson-sep">
+    <div class="section" id="lesson-9">
+      <div class="lesson-hd reveal">
+        <div class="lesson-icon" style="background:#d1fae5">📐</div>
+        <div class="lesson-title">
+          <span class="lesson-badge-pill">Lesson 09</span>
+          <h2>NumPy & Pandas</h2>
+          <div class="sub">The data science power duo — arrays and DataFrames</div>
+        </div>
+      </div>
+
+      <div class="callout note reveal">
+        <span class="callout-icon">🧪</span>
+        <div><div class="callout-head">Run these in Google Colab</div><p>NumPy and Pandas aren't available in this browser editor — they need a full Python environment. Open <a href="https://colab.research.google.com" target="_blank" style="color:var(--blue)">Google Colab</a>, paste any code example, and run it there. Colab is free and has everything pre-installed.</p></div>
+      </div>
+
+      <p class="prose reveal">NumPy gives you <strong>fast numerical arrays</strong>. Pandas gives you <strong>DataFrames</strong> — like Excel, but programmable. Together they power almost all data science in Python.</p>
+
+      <div class="cc-grid reveal">
+        <div class="cc"><h4>🔢 NumPy Array</h4><p>Like a list but 100× faster for math. Operations apply to every element at once.</p></div>
+        <div class="cc"><h4>🐼 DataFrame</h4><p>A table with named columns. Filter, sort, group, merge — everything Excel can do, but in code.</p></div>
+        <div class="cc"><h4>📊 Instant Stats</h4><p><code>np.mean()</code>, <code>.std()</code>, <code>.describe()</code> — one line gives you full statistics.</p></div>
+        <div class="cc"><h4>📁 Read Any File</h4><p><code>pd.read_csv()</code>, <code>pd.read_excel()</code> — load millions of rows in one line.</p></div>
+      </div>
+
+      <div class="code-display reveal">
+        <div class="cd-top">
+          <span class="cd-title">numpy_pandas.py — copy & run in Colab</span>
+          <button class="cd-copy" onclick="copyDisplay('np-code')">Copy</button>
+        </div>
+        <pre class="code-pre"><code class="code-body" id="np-code"><span class="kw">import</span> <span class="bi">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+<span class="kw">import</span> <span class="bi">pandas</span> <span class="kw">as</span> <span class="var">pd</span>
+
+<span class="cm"># ── NumPy: element-wise operations ──</span>
+<span class="var">temps</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([<span class="num">22.5</span>, <span class="num">23.1</span>, <span class="num">22.8</span>, <span class="num">23.5</span>, <span class="num">22.9</span>])
+<span class="bi">print</span>(<span class="var">temps</span> <span class="op">+</span> <span class="num">273.15</span>)          <span class="cm"># adds to EVERY element (not possible with lists!)</span>
+<span class="bi">print</span>(<span class="fmt">f"Mean: {np.mean(temps):.2f}"</span>)
+<span class="bi">print</span>(<span class="fmt">f"Std:  {np.std(temps):.2f}"</span>)
+<span class="bi">print</span>(<span class="fmt">f"Max:  {np.max(temps):.2f}"</span>)
+<span class="bi">print</span>(<span class="var">temps</span>[<span class="var">temps</span> <span class="op">&gt;</span> <span class="num">23.0</span>])       <span class="cm"># boolean filter</span>
+
+<span class="cm"># ── Pandas: DataFrames ──</span>
+<span class="var">df</span> <span class="op">=</span> <span class="var">pd</span>.<span class="fn">DataFrame</span>({
+    <span class="str">"player"</span> : [<span class="str">"Kohli"</span>, <span class="str">"Rohit"</span>, <span class="str">"Dhoni"</span>, <span class="str">"Bumrah"</span>],
+    <span class="str">"matches"</span>: [<span class="num">269</span>,   <span class="num">255</span>,   <span class="num">350</span>,   <span class="num">90</span>  ],
+    <span class="str">"avg"</span>    : [<span class="num">57.3</span>,  <span class="num">48.6</span>,  <span class="num">50.6</span>,  <span class="num">None</span>],
+})
+<span class="bi">print</span>(<span class="var">df</span>)
+<span class="bi">print</span>(<span class="var">df</span>.<span class="fn">describe</span>())                          <span class="cm"># stats for all columns</span>
+<span class="bi">print</span>(<span class="var">df</span>[<span class="var">df</span>[<span class="str">"avg"</span>] <span class="op">&gt;</span> <span class="num">50</span>])                    <span class="cm"># filter rows</span>
+<span class="bi">print</span>(<span class="var">df</span>.<span class="fn">nlargest</span>(<span class="num">2</span>, <span class="str">"matches"</span>))            <span class="cm"># top 2 by matches</span>
+
+<span class="cm"># Load real data from CSV:</span>
+<span class="cm"># df = pd.read_csv("your_file.csv")</span></code></pre>
+      </div>
+      <button class="mark-done" id="done-9" onclick="markDone(9)">✓ Mark Lesson 9 Complete</button>
+    </div>
+
+    <!-- ═══ AUTOMATE ═══ -->
+    <hr class="lesson-sep">
+    <div class="section" id="automate">
+      <div class="lesson-hd reveal">
+        <div class="lesson-icon" style="background:var(--amber-l)">🤖</div>
+        <div class="lesson-title">
+          <span class="lesson-badge-pill" style="background:var(--amber)">Bonus</span>
+          <h2>Automate the Boring Stuff</h2>
+          <div class="sub">Where Python becomes genuinely life-changing</div>
+        </div>
+      </div>
+
+      <div class="callout tip reveal">
+        <span class="callout-icon">⏱️</span>
+        <div><div class="callout-head">Time Maths</div><p>Renaming 200 files by hand: ~25 minutes. Python: 4 seconds. Merging 12 Excel files: ~45 minutes. Python: 8 lines. Emailing 50 students individually: ~90 minutes. Python: 30 seconds. These scripts work right now, in 2026.</p></div>
+      </div>
+
+      <div class="auto-tabs reveal">
+        <button class="auto-tab active" onclick="autoTab('files',this)">📁 Rename Files</button>
+        <button class="auto-tab" onclick="autoTab('excel',this)">📊 Merge Excel</button>
+        <button class="auto-tab" onclick="autoTab('scrape',this)">🌐 Web Scraping</button>
+        <button class="auto-tab" onclick="autoTab('email',this)">📧 Auto Email</button>
+        <button class="auto-tab" onclick="autoTab('schedule',this)">⏰ Scheduling</button>
+      </div>
+
+      <!-- FILES -->
+      <div class="auto-content active" id="atab-files">
+        <p class="prose">Rename 500 photos from <code>IMG_0034.jpg</code> → <code>Trip_001.jpg</code> in seconds. No manual work.</p>
+        <div class="auto-use"><div class="au-label">Built-in</div><p><code>pathlib</code> comes with Python — no install needed. It's the modern 2026 way to handle files.</p></div>
+        <div class="code-display">
+          <div class="cd-top"><span class="cd-title">rename_files.py</span><button class="cd-copy" onclick="copyDisplay('auto-f')">Copy</button></div>
+          <pre class="code-pre"><code class="code-body" id="auto-f"><span class="kw">from</span> <span class="bi">pathlib</span> <span class="kw">import</span> <span class="fn">Path</span>
+
+<span class="var">folder</span> <span class="op">=</span> <span class="fn">Path</span>(<span class="str">"school_trip_photos"</span>)
+<span class="var">photos</span> <span class="op">=</span> <span class="bi">sorted</span>(<span class="var">folder</span>.<span class="fn">glob</span>(<span class="str">"*.jpg"</span>))
+
+<span class="bi">print</span>(<span class="fmt">f"Found {len(photos)} photos"</span>)
+
+<span class="kw">for</span> <span class="var">i</span>, <span class="var">photo</span> <span class="kw">in</span> <span class="bi">enumerate</span>(<span class="var">photos</span>, <span class="num">1</span>):
+    <span class="var">new_name</span> <span class="op">=</span> <span class="var">folder</span> <span class="op">/</span> <span class="fmt">f"Trip_{i:03d}.jpg"</span>  <span class="cm"># Trip_001, Trip_002...</span>
+    <span class="var">photo</span>.<span class="fn">rename</span>(<span class="var">new_name</span>)
+    <span class="bi">print</span>(<span class="fmt">f"  {photo.name}  →  {new_name.name}"</span>)
+
+<span class="bi">print</span>(<span class="str">"\n✅ All renamed!"</span>)</code></pre>
+        </div>
+      </div>
+
+      <!-- EXCEL -->
+      <div class="auto-content" id="atab-excel">
+        <p class="prose">Combine 12 monthly CSV files, clean the data, and export a summary to Excel — all automated.</p>
+        <div class="auto-use"><div class="au-label">Install once</div><p><code>pip install pandas openpyxl</code></p></div>
+        <div class="code-display">
+          <div class="cd-top"><span class="cd-title">merge_files.py</span><button class="cd-copy" onclick="copyDisplay('auto-e')">Copy</button></div>
+          <pre class="code-pre"><code class="code-body" id="auto-e"><span class="kw">import</span> <span class="bi">pandas</span> <span class="kw">as</span> <span class="var">pd</span>
+<span class="kw">from</span> <span class="bi">pathlib</span> <span class="kw">import</span> <span class="fn">Path</span>
+
+<span class="cm"># Load all CSVs from a folder in one shot</span>
+<span class="var">files</span> <span class="op">=</span> <span class="bi">list</span>(<span class="fn">Path</span>(<span class="str">"marks/"</span>).<span class="fn">glob</span>(<span class="str">"*.csv"</span>))
+<span class="var">df</span>    <span class="op">=</span> <span class="var">pd</span>.<span class="fn">concat</span>([<span class="var">pd</span>.<span class="fn">read_csv</span>(<span class="var">f</span>) <span class="kw">for</span> <span class="var">f</span> <span class="kw">in</span> <span class="var">files</span>])
+
+<span class="cm"># Clean: fix column names, drop duplicates</span>
+<span class="var">df</span>.<span class="var">columns</span> <span class="op">=</span> <span class="var">df</span>.<span class="var">columns</span>.<span class="fn">str.lower</span>().<span class="fn">str.strip</span>()
+<span class="var">df</span>         <span class="op">=</span> <span class="var">df</span>.<span class="fn">drop_duplicates</span>()
+
+<span class="cm"># Fill missing marks with subject median</span>
+<span class="kw">for</span> <span class="var">col</span> <span class="kw">in</span> [<span class="str">"maths"</span>, <span class="str">"science"</span>, <span class="str">"english"</span>]:
+    <span class="var">df</span>[<span class="var">col</span>].<span class="fn">fillna</span>(<span class="var">df</span>[<span class="var">col</span>].<span class="fn">median</span>(), <span class="var">inplace</span><span class="op">=</span><span class="kw">True</span>)
+
+<span class="cm"># Summary by section</span>
+<span class="var">summary</span> <span class="op">=</span> <span class="var">df</span>.<span class="fn">groupby</span>(<span class="str">"section"</span>)[[<span class="str">"maths"</span>,<span class="str">"science"</span>]].<span class="fn">mean</span>().<span class="fn">round</span>(<span class="num">1</span>)
+
+<span class="cm"># Export to Excel with multiple sheets</span>
+<span class="kw">with</span> <span class="var">pd</span>.<span class="fn">ExcelWriter</span>(<span class="str">"annual_report.xlsx"</span>) <span class="kw">as</span> <span class="var">writer</span>:
+    <span class="var">df</span>.<span class="fn">to_excel</span>(<span class="var">writer</span>, <span class="var">sheet_name</span><span class="op">=</span><span class="str">"Raw Data"</span>,  <span class="var">index</span><span class="op">=</span><span class="kw">False</span>)
+    <span class="var">summary</span>.<span class="fn">to_excel</span>(<span class="var">writer</span>, <span class="var">sheet_name</span><span class="op">=</span><span class="str">"Summary"</span>)
+<span class="bi">print</span>(<span class="str">"✅ annual_report.xlsx saved!"</span>)</code></pre>
+        </div>
+      </div>
+
+      <!-- SCRAPE -->
+      <div class="auto-content" id="atab-scrape">
+        <p class="prose">Fetch live data from websites — prices, headlines, scores — without copy-pasting. This is how analysts and journalists get data in 2026.</p>
+        <div class="auto-use"><div class="au-label">Install</div><p><code>pip install requests beautifulsoup4</code> · Always respect a site's terms of service and robots.txt.</p></div>
+        <div class="code-display">
+          <div class="cd-top"><span class="cd-title">web_scrape.py</span><button class="cd-copy" onclick="copyDisplay('auto-s')">Copy</button></div>
+          <pre class="code-pre"><code class="code-body" id="auto-s"><span class="kw">import</span> <span class="bi">requests</span>
+<span class="kw">from</span> <span class="bi">bs4</span> <span class="kw">import</span> <span class="fn">BeautifulSoup</span>
+<span class="kw">import</span> <span class="bi">pandas</span> <span class="kw">as</span> <span class="var">pd</span>
+
+<span class="cm"># books.toscrape.com is a free practice scraping site</span>
+<span class="var">url</span>      <span class="op">=</span> <span class="str">"https://books.toscrape.com"</span>
+<span class="var">response</span> <span class="op">=</span> <span class="bi">requests</span>.<span class="fn">get</span>(<span class="var">url</span>, <span class="var">timeout</span><span class="op">=</span><span class="num">10</span>)
+<span class="var">soup</span>     <span class="op">=</span> <span class="fn">BeautifulSoup</span>(<span class="var">response</span>.<span class="var">text</span>, <span class="str">"html.parser"</span>)
+
+<span class="var">books</span> <span class="op">=</span> <span class="var">soup</span>.<span class="fn">find_all</span>(<span class="str">"article"</span>, <span class="var">class_</span><span class="op">=</span><span class="str">"product_pod"</span>)
+<span class="var">data</span>  <span class="op">=</span> []
+<span class="kw">for</span> <span class="var">book</span> <span class="kw">in</span> <span class="var">books</span>:
+    <span class="var">data</span>.<span class="fn">append</span>({
+        <span class="str">"title"</span>  : <span class="var">book</span>.<span class="fn">h3</span>.<span class="fn">a</span>[<span class="str">"title"</span>],
+        <span class="str">"price"</span>  : <span class="var">book</span>.<span class="fn">find</span>(<span class="str">"p"</span>, <span class="var">class_</span><span class="op">=</span><span class="str">"price_color"</span>).<span class="var">text</span>,
+        <span class="str">"rating"</span> : <span class="var">book</span>.<span class="fn">p</span>[<span class="str">"class"</span>][<span class="num">1</span>]
+    })
+
+<span class="var">df</span> <span class="op">=</span> <span class="var">pd</span>.<span class="fn">DataFrame</span>(<span class="var">data</span>)
+<span class="var">df</span>.<span class="fn">to_csv</span>(<span class="str">"books.csv"</span>, <span class="var">index</span><span class="op">=</span><span class="kw">False</span>)
+<span class="bi">print</span>(<span class="var">df</span>.<span class="fn">head</span>())
+<span class="bi">print</span>(<span class="fmt">f"\n✅ Scraped {len(df)} books → books.csv"</span>)</code></pre>
+        </div>
+      </div>
+
+      <!-- EMAIL -->
+      <div class="auto-content" id="atab-email">
+        <p class="prose">Send 100 personalised emails — each with the student's name and specific score. What takes 90 minutes by hand takes Python 30 seconds.</p>
+        <div class="auto-use"><div class="au-label">Gmail Setup</div><p>Enable 2-step verification → generate an App Password at myaccount.google.com → use that in the script, not your real password.</p></div>
+        <div class="code-display">
+          <div class="cd-top"><span class="cd-title">send_emails.py</span><button class="cd-copy" onclick="copyDisplay('auto-em')">Copy</button></div>
+          <pre class="code-pre"><code class="code-body" id="auto-em"><span class="kw">import</span> <span class="bi">smtplib</span>
+<span class="kw">from</span> <span class="bi">email.mime.text</span> <span class="kw">import</span> <span class="fn">MIMEText</span>
+<span class="kw">import</span> <span class="bi">pandas</span> <span class="kw">as</span> <span class="var">pd</span>
+
+<span class="var">df</span>      <span class="op">=</span> <span class="var">pd</span>.<span class="fn">read_csv</span>(<span class="str">"students.csv"</span>)  <span class="cm"># columns: name, email, score</span>
+<span class="var">sender</span>  <span class="op">=</span> <span class="str">"<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0c78696d6f64697e4c7f6f64636360226f6361">[email&#160;protected]</a>"</span>
+<span class="var">app_pwd</span> <span class="op">=</span> <span class="str">"xxxx xxxx xxxx xxxx"</span>
+
+<span class="kw">with</span> <span class="bi">smtplib</span>.<span class="fn">SMTP_SSL</span>(<span class="str">"smtp.gmail.com"</span>, <span class="num">465</span>) <span class="kw">as</span> <span class="var">server</span>:
+    <span class="var">server</span>.<span class="fn">login</span>(<span class="var">sender</span>, <span class="var">app_pwd</span>)
+    <span class="kw">for</span> _, <span class="var">row</span> <span class="kw">in</span> <span class="var">df</span>.<span class="fn">iterrows</span>():
+        <span class="var">grade</span> <span class="op">=</span> <span class="str">"A 🌟"</span> <span class="kw">if</span> <span class="var">row</span>.<span class="var">score</span><span class="op">&gt;=</span><span class="num">90</span> <span class="kw">else</span> <span class="str">"B"</span> <span class="kw">if</span> <span class="var">row</span>.<span class="var">score</span><span class="op">&gt;=</span><span class="num">75</span> <span class="kw">else</span> <span class="str">"C"</span>
+        <span class="var">body</span>  <span class="op">=</span> <span class="str">f"""Hi {row['name']},
+
+Score: {row['score']}/100  |  Grade: {grade}
+
+{"Excellent work! 🎉" if row.score >= 90 else "Keep going — you've got this! 💪"}
+
+— Your Teacher"""</span>
+        <span class="var">msg</span>            <span class="op">=</span> <span class="fn">MIMEText</span>(<span class="var">body</span>)
+        <span class="var">msg</span>[<span class="str">"Subject"</span>] <span class="op">=</span> <span class="fmt">f"Result: {row['name']}"</span>
+        <span class="var">msg</span>[<span class="str">"From"</span>]    <span class="op">=</span> <span class="var">sender</span>
+        <span class="var">msg</span>[<span class="str">"To"</span>]      <span class="op">=</span> <span class="var">row</span>[<span class="str">"email"</span>]
+        <span class="var">server</span>.<span class="fn">send_message</span>(<span class="var">msg</span>)
+        <span class="bi">print</span>(<span class="fmt">f"  ✅ Sent to {row['name']}"</span>)</code></pre>
+        </div>
+      </div>
+
+      <!-- SCHEDULE -->
+      <div class="auto-content" id="atab-schedule">
+        <p class="prose">Run scripts automatically every day at a set time — daily reports, price checks, backups — without touching a button.</p>
+        <div class="auto-use"><div class="au-label">Install</div><p><code>pip install schedule</code> · For always-on automation use GitHub Actions (free) or a Raspberry Pi.</p></div>
+        <div class="code-display">
+          <div class="cd-top"><span class="cd-title">scheduler.py</span><button class="cd-copy" onclick="copyDisplay('auto-sc')">Copy</button></div>
+          <pre class="code-pre"><code class="code-body" id="auto-sc"><span class="kw">import</span> <span class="bi">schedule</span>
+<span class="kw">import</span> <span class="bi">time</span>
+<span class="kw">from</span> <span class="bi">datetime</span> <span class="kw">import</span> <span class="fn">datetime</span>
+
+<span class="kw">def</span> <span class="fn">daily_report</span>():
+    <span class="bi">print</span>(<span class="fmt">f"[{datetime.now():%H:%M}] Generating daily report..."</span>)
+    <span class="cm"># your pandas / email code here</span>
+
+<span class="kw">def</span> <span class="fn">backup_data</span>():
+    <span class="kw">import</span> <span class="bi">shutil</span>
+    <span class="bi">shutil</span>.<span class="fn">copytree</span>(<span class="str">"data/"</span>, <span class="fmt">f"backup_{datetime.now():%Y%m%d}/"</span>)
+    <span class="bi">print</span>(<span class="str">"💾 Backup complete"</span>)
+
+<span class="cm"># Define the schedule</span>
+<span class="bi">schedule</span>.<span class="fn">every</span>().<span class="fn">day.at</span>(<span class="str">"07:00"</span>).<span class="fn">do</span>(<span class="fn">daily_report</span>)
+<span class="bi">schedule</span>.<span class="fn">every</span>().<span class="fn">sunday.at</span>(<span class="str">"22:00"</span>).<span class="fn">do</span>(<span class="fn">backup_data</span>)
+
+<span class="bi">print</span>(<span class="str">"Scheduler started — Ctrl+C to stop"</span>)
+<span class="kw">while</span> <span class="kw">True</span>:
+    <span class="bi">schedule</span>.<span class="fn">run_pending</span>()
+    <span class="bi">time</span>.<span class="fn">sleep</span>(<span class="num">60</span>)</code></pre>
+        </div>
+      </div>
+    </div><!-- /automate -->
+
+    <!-- ═══ AI 2026 ═══ -->
+    <hr class="lesson-sep">
+    <div class="section" id="ai2026">
+      <div class="lesson-hd reveal">
+        <div class="lesson-icon" style="background:#d1fae5">✨</div>
+        <div class="lesson-title">
+          <span class="lesson-badge-pill" style="background:var(--green)">New in 2026</span>
+          <h2>Python × AI</h2>
+          <div class="sub">Connect your Python code to the world's most powerful language models</div>
+        </div>
+      </div>
+
+      <div class="callout ok reveal">
+        <span class="callout-icon">🤔</span>
+        <div><div class="callout-head">Do you still need to learn Python if AI writes code?</div><p>Yes — more than ever. AI assistants generate code, but you need to understand it to: catch bugs, modify it for your needs, and know when it's wrong. Think of AI as a very fast typist — <em>you</em> are still the programmer giving direction and checking the work.</p></div>
+      </div>
+
+      <div class="ai-cards reveal">
+        <div class="ai-card"><div><span class="ai-dot"></span><strong>Talk to any LLM</strong></div><p>Gemini, Claude, GPT — all have Python APIs. 10 lines of Python = your own AI assistant that you fully control.</p></div>
+        <div class="ai-card"><div><span class="ai-dot" style="background:var(--blue)"></span><strong>Feed it your data</strong></div><p>Pass a Pandas DataFrame to an LLM and ask it to summarise, find patterns, or write a report. Data science + AI in one pipeline.</p></div>
+        <div class="ai-card"><div><span class="ai-dot" style="background:var(--amber)"></span><strong>Build AI apps</strong></div><p><code>streamlit</code> or <code>gradio</code> turns any Python script into a web app in minutes. Your AI tool, live on the internet.</p></div>
+      </div>
+
+      <div class="code-display reveal">
+        <div class="cd-top">
+          <span class="cd-title">llm_api_2026.py — copy & run in Colab</span>
+          <button class="cd-copy" onclick="copyDisplay('ai-code')">Copy</button>
+        </div>
+        <pre class="code-pre"><code class="code-body" id="ai-code"><span class="cm"># Install: pip install google-generativeai</span>
+<span class="kw">import</span> <span class="bi">google.generativeai</span> <span class="kw">as</span> <span class="var">genai</span>
+
+<span class="var">genai</span>.<span class="fn">configure</span>(<span class="var">api_key</span><span class="op">=</span><span class="str">"YOUR_API_KEY"</span>)  <span class="cm"># free at aistudio.google.com</span>
+<span class="var">model</span> <span class="op">=</span> <span class="var">genai</span>.<span class="fn">GenerativeModel</span>(<span class="str">"gemini-2.0-flash"</span>)
+
+<span class="cm"># ── Ask anything ──</span>
+<span class="var">r</span> <span class="op">=</span> <span class="var">model</span>.<span class="fn">generate_content</span>(<span class="str">"Explain recursion to a 16-year-old"</span>)
+<span class="bi">print</span>(<span class="var">r</span>.<span class="var">text</span>)
+
+<span class="cm"># ── Analyse data with AI ──</span>
+<span class="kw">import</span> <span class="bi">pandas</span> <span class="kw">as</span> <span class="var">pd</span>
+<span class="var">df</span>     <span class="op">=</span> <span class="var">pd</span>.<span class="fn">read_csv</span>(<span class="str">"class_results.csv"</span>)
+<span class="var">prompt</span> <span class="op">=</span> <span class="fmt">f"Analyse this student data and give key insights:\n{df.to_string()}"</span>
+<span class="bi">print</span>(<span class="var">model</span>.<span class="fn">generate_content</span>(<span class="var">prompt</span>).<span class="var">text</span>)
+
+<span class="cm"># ── Simple chatbot in 10 lines ──</span>
+<span class="var">chat</span> <span class="op">=</span> <span class="var">model</span>.<span class="fn">start_chat</span>(<span class="var">history</span><span class="op">=</span>[])
+<span class="kw">while</span> <span class="kw">True</span>:
+    <span class="var">msg</span> <span class="op">=</span> <span class="bi">input</span>(<span class="str">"You: "</span>)
+    <span class="kw">if</span> <span class="var">msg</span>.<span class="fn">lower</span>() <span class="op">==</span> <span class="str">"quit"</span>: <span class="kw">break</span>
+    <span class="bi">print</span>(<span class="fmt">f"AI: {chat.send_message(msg).text}\n"</span>)</code></pre>
+      </div>
+    </div>
+
+    <!-- ═══ RESOURCES ═══ -->
+    <hr class="lesson-sep">
+    <div class="section" id="resources">
+      <p class="section-label">Go Deeper</p>
+      <h2 class="section-title">Free Resources Worth Your Time</h2>
+      <p class="section-sub">Curated — not a random dump. These are the ones that actually help.</p>
+      <div class="res-grid">
+        <a href="https://colab.research.google.com" target="_blank" class="res-card reveal"><div class="rc-cat" style="color:var(--orange)">Practice Now</div><h4>Google Colab</h4><p>Free Jupyter notebooks in your browser. No setup. Start instantly.</p></a>
+        <a href="https://www.kaggle.com/learn" target="_blank" class="res-card reveal"><div class="rc-cat" style="color:var(--teal)">Best for Beginners</div><h4>Kaggle Learn</h4><p>Free interactive courses with real datasets. Top recommendation.</p></a>
+        <a href="https://automatetheboringstuff.com" target="_blank" class="res-card reveal"><div class="rc-cat" style="color:var(--green)">Free Book</div><h4>Automate the Boring Stuff</h4><p>Al Sweigart's classic — entire book free online. Practical & fun.</p></a>
+        <a href="https://realpython.com" target="_blank" class="res-card reveal"><div class="rc-cat" style="color:var(--purple)">Articles</div><h4>Real Python</h4><p>In-depth tutorials on every Python topic. Excellent quality.</p></a>
+        <a href="https://docs.python.org/3/" target="_blank" class="res-card reveal"><div class="rc-cat" style="color:var(--blue)">Official</div><h4>Python 3 Docs</h4><p>The authoritative reference. Use the search bar.</p></a>
+        <a href="https://scikit-learn.org" target="_blank" class="res-card reveal"><div class="rc-cat" style="color:var(--ink3)">Next Step</div><h4>Scikit-Learn</h4><p>ML in Python. Best-documented library in existence.</p></a>
+        <a href="https://ai.google.dev" target="_blank" class="res-card reveal"><div class="rc-cat" style="color:var(--green)">AI / 2026</div><h4>Google AI Studio</h4><p>Free Gemini API key. Build your first AI app today.</p></a>
+        <a href="https://pandas.pydata.org/docs/" target="_blank" class="res-card reveal"><div class="rc-cat" style="color:var(--ink3)">Library</div><h4>Pandas Docs</h4><p>Official DataFrame docs. Very well organised.</p></a>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /page-wrap -->
+
+<footer>
+  <div class="footer-brand">Python Zero to Hero — 2026 Edition</div>
+  <p>Curated by <strong>Ajay Choudhary</strong> · Data Scientist · ISB · IIT Indore</p>
+  <p style="margin-top:1rem;font-size:.72rem;color:#334155">Built with Python, curiosity, and f-strings · 2026</p>
+</footer>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ────────── SKULPT PYTHON RUNNER ────────── */
+const originalCodes = {};
+
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.code-textarea').forEach(ta => {
+    originalCodes[ta.id] = ta.value;
+  });
+});
+
+function runCode(editorId) {
+  var codeEl = document.getElementById(editorId + '-code');
+  var outEl  = document.getElementById(editorId + '-text');
+  var runBtn = document.querySelector('#' + editorId + ' .btn-run');
+  if (!codeEl || !outEl || !runBtn) return;
+
+  /* Check Skulpt is actually available */
+  if (!window._skulptReady || typeof Sk === 'undefined' || typeof Sk.misceval === 'undefined') {
+    outEl.textContent = '⏳ Python engine is still loading — please wait a few seconds and try again.';
+    outEl.className = 'output-text has-error';
+    return;
+  }
+
+  var code = codeEl.value;
+
+  /* Clear previous output */
+  outEl.textContent = '';
+  outEl.className = 'output-text';
+
+  /* Button → running state */
+  runBtn.textContent = '⟳ Running...';
+  runBtn.classList.add('running');
+  runBtn.disabled = true;
+
+  function resetBtn() {
+    runBtn.textContent = '▶ Run';
+    runBtn.classList.remove('running');
+    runBtn.disabled = false;
+  }
+
+  /* Configure Skulpt with closure over outEl */
+  try {
+    Sk.configure({
+      output: function(text) { outEl.textContent += text; },
+      read: function(x) {
+        if (typeof Sk.builtinFiles === 'undefined' || typeof Sk.builtinFiles['files'][x] === 'undefined')
+          throw "Module '" + x + "' not available in browser mode.";
+        return Sk.builtinFiles['files'][x];
+      },
+      inputfun: function(p) { return window.prompt(p || 'Input:') || ''; },
+      inputfunTakesPrompt: true,
+      __future__: Sk.python3,
+      execLimit: 10000
+    });
+  } catch(configErr) {
+    outEl.textContent = '❌ Config error: ' + configErr;
+    outEl.className = 'output-text has-error';
+    resetBtn();
+    return;
+  }
+
+  /* Run the code */
+  var promise;
+  try {
+    promise = Sk.misceval.asyncToPromise(function() {
+      return Sk.importMainWithBody('<stdin>', false, code, true);
+    });
+  } catch(runErr) {
+    outEl.textContent = '❌ ' + runErr.toString();
+    outEl.className = 'output-text has-error';
+    resetBtn();
+    return;
+  }
+
+  promise.then(
+    function() {
+      if (!outEl.textContent.trim()) {
+        outEl.textContent = '(No output — did you forget to add print() somewhere?)';
+        outEl.className = 'output-text empty';
+      }
+      resetBtn();
+    },
+    function(err) {
+      var msg = err.toString();
+      /* Make common errors student-friendly */
+      if (msg.indexOf('NameError') > -1)        msg = '❌ NameError: ' + msg.split('NameError:')[1];
+      else if (msg.indexOf('SyntaxError') > -1)  msg = '❌ SyntaxError: Check your indentation and brackets.\n' + msg;
+      else if (msg.indexOf('IndentationError') > -1) msg = '❌ IndentationError: Use 4 spaces for indentation.\n' + msg;
+      else msg = '❌ ' + msg;
+      outEl.textContent = msg;
+      outEl.className = 'output-text has-error';
+      resetBtn();
+    }
+  );
+}
+
+function resetCode(editorId) {
+  const codeEl = document.getElementById(editorId + '-code');
+  const outEl  = document.getElementById(editorId + '-text');
+  if (codeEl && originalCodes[editorId + '-code']) {
+    codeEl.value = originalCodes[editorId + '-code'];
+  }
+  if (outEl) {
+    outEl.textContent = 'Press ▶ Run to execute...';
+    outEl.className = 'output-text empty';
+  }
+}
+
+function copyCode(editorId) {
+  const codeEl = document.getElementById(editorId + '-code');
+  const btn    = document.querySelector(`#${editorId} .btn-copy`);
+  if (!codeEl) return;
+  navigator.clipboard.writeText(codeEl.value).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+function copyDisplay(codeId) {
+  const el  = document.getElementById(codeId);
+  const btn = el ? el.closest('.code-display').querySelector('.cd-copy') : null;
+  if (!el) return;
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    if (btn) { btn.textContent = 'Copied!'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500); }
+  });
+}
+
+// Tab support in textareas
+document.querySelectorAll('.code-textarea').forEach(ta => {
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = ta.selectionStart, end = ta.selectionEnd;
+      ta.value = ta.value.substring(0, s) + '    ' + ta.value.substring(end);
+      ta.selectionStart = ta.selectionEnd = s + 4;
+    }
+  });
+});
+
+/* ────────── QUIZZES ────────── */
+function mcq(btn, qId, isCorrect) {
+  const block = document.getElementById(qId);
+  if (!block) return;
+  const opts = block.querySelectorAll('.quiz-opt');
+  opts.forEach(b => { b.disabled = true; });
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  const reveal = document.getElementById(qId + '-reveal');
+  if (reveal) reveal.classList.add('show');
+  if (!isCorrect) {
+    // Briefly show which one was correct via reveal text
+  }
+  showToast(isCorrect ? '✅ Correct!' : '❌ Not quite — see explanation below');
+}
+
+function checkFib(qId, answers) {
+  const block = document.getElementById(qId);
+  if (!block) return;
+  const inputs = block.querySelectorAll('.fib-input');
+  let allCorrect = true;
+  inputs.forEach(function(inp) {
+    const val = inp.value.trim();
+    const ok  = answers.some(function(a) { return a.toLowerCase() === val.toLowerCase(); });
+    inp.classList.remove('correct', 'wrong');
+    inp.classList.add(ok ? 'correct' : 'wrong');
+    inp.disabled = true;
+    if (!ok) allCorrect = false;
+  });
+  const reveal = document.getElementById(qId + '-reveal');
+  if (reveal) reveal.classList.add('show');
+  const checkBtn = block.querySelector('.btn-check');
+  if (checkBtn) checkBtn.disabled = true;
+  showToast(allCorrect ? '✅ Correct!' : '❌ Not quite — see explanation below');
+}
+
+/* Special check for city FIB: accept ANY string wrapped in quotes */
+function checkFibCity(qId) {
+  const block = document.getElementById(qId);
+  if (!block) return;
+  const inp = document.getElementById(qId + '-i1');
+  if (!inp) return;
+
+  const val = inp.value.trim();
+  const reveal = document.getElementById(qId + '-reveal');
+  const checkBtn = block.querySelector('.btn-check');
+
+  // Valid if surrounded by matching double quotes OR single quotes, with content inside
+  const dq = /^"[^"]{1,50}"$/.test(val);   // "anything"
+  const sq = /^'[^']{1,50}'$/.test(val);   // 'anything'
+  const ok = dq || sq;
+
+  inp.classList.remove('correct', 'wrong');
+  inp.classList.add(ok ? 'correct' : 'wrong');
+  inp.disabled = true;
+  if (checkBtn) checkBtn.disabled = true;
+  if (reveal) reveal.classList.add('show');
+
+  if (!ok) {
+    // Give targeted hint
+    if (!val) {
+      showToast('💬 Type your city name first, e.g. "Mumbai"');
+      inp.disabled = false;
+      if (checkBtn) checkBtn.disabled = false;
+    } else if (!val.includes('"') && !val.includes("'")) {
+      showToast('❌ Missing quotes! Try "' + val + '" (with quotes)');
+    } else {
+      showToast('❌ Check your quotes — use "City" or \'City\'');
+    }
+  } else {
+    showToast('✅ Correct! ' + val + ' is a valid Python string.');
+  }
+}
+
+/* ────────── LESSON PROGRESS ────────── */
+const completed = new Set();
+const TOTAL = 9;
+
+function markDone(n) {
+  completed.add(n);
+  const btn = document.getElementById(`done-${n}`);
+  if (btn) { btn.textContent = '✅ Lesson ' + n + ' Complete!'; btn.classList.add('done'); }
+  updateProgress();
+  updateSidebar();
+  showToast(`🎉 Lesson ${n} complete! ${completed.size}/${TOTAL} done`);
+}
+
+function updateProgress() {
+  const pct = (completed.size / TOTAL) * 100;
+  document.getElementById('top-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `${completed.size}/${TOTAL}`;
+  const circumference = 81.7;
+  const offset = circumference - (pct / 100) * circumference;
+  document.getElementById('ring-fill').style.strokeDashoffset = offset;
+}
+
+function updateSidebar() {
+  completed.forEach(n => {
+    document.querySelectorAll(`[data-lesson="${n}"]`).forEach(el => {
+      el.classList.add('done');
+    });
+  });
+}
+
+/* ────────── TOAST ────────── */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ────────── AUTOMATE TABS ────────── */
+function autoTab(id, btn) {
+  document.querySelectorAll('.auto-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.auto-tab').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('atab-' + id);
+  if (el) el.classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ────────── HAMBURGER / DRAWER ────────── */
+const hamburger = document.getElementById('hamburger');
+const drawer    = document.getElementById('drawer');
+const overlay   = document.getElementById('drawer-overlay');
+const drawerClose = document.getElementById('drawer-close');
+
+function openDrawer()  { drawer.classList.add('open'); overlay.classList.add('open'); hamburger.classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('open'); hamburger.classList.remove('open'); document.body.style.overflow = ''; }
+hamburger.addEventListener('click', () => drawer.classList.contains('open') ? closeDrawer() : openDrawer());
+overlay.addEventListener('click', closeDrawer);
+drawerClose.addEventListener('click', closeDrawer);
+drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', closeDrawer));
+
+/* ────────── SCROLL ────────── */
+window.addEventListener('scroll', () => {
+  // Top progress (only for lesson sections)
+  const scrolled = window.scrollY;
+  const total    = document.body.scrollHeight - window.innerHeight;
+  if (total > 0) document.getElementById('top-fill').style.width = (scrolled / total * 100) + '%';
+
+  // Active sidebar link
+  const sections = document.querySelectorAll('[id^="lesson-"], #hero, #automate, #ai2026, #resources');
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
+  document.querySelectorAll('.sidebar-link, .drawer-link').forEach(l => {
+    l.classList.remove('active');
+    if (l.getAttribute('href') === '#' + current) l.classList.add('active');
+  });
+});
+
+/* ────────── REVEAL ON SCROLL ────────── */
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
+}, { threshold: 0.06, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+
+/* ────────── STAGGER TOPIC CARDS ────────── */
+document.querySelectorAll('.topics-grid .topic-card').forEach(function(c, i) {
+  c.style.transitionDelay = (i * 0.05) + 's';
+});
+
+</script>
 </body>
 </html>
